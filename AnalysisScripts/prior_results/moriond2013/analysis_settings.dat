@@ -62,21 +62,21 @@ doEcorrectionSmear=1
 doEcorrectionSyst=0
 
 ## energy scale adjustement and errors
-scale_offset_file=energy_scale_offsets.dat
-scale_offset_error_file=energy_scale_errors.dat
+scale_offset_file=prior_results/moriond2013/energy_scale_offsets.dat
+scale_offset_error_file=prior_results/moriond2013/energy_scale_errors.dat
 
 ## uncorrelated part of the uncertainties
 splitEscaleSyst=0
-scale_offset_corr_error_file=energy_scale_corr_errors.dat
+scale_offset_corr_error_file=prior_results/moriond2013/energy_scale_corr_errors.dat
 
 ## additional MC smearing
-smearing_file=smearing_sigma_and_errors.dat
+smearing_file=prior_results/moriond2013/smearing_sigma_and_errors.dat
 ## smearing correction for BDT input
-mass_resol_file=smearing_sigma_and_errors_hcp2012.dat
+mass_resol_file=prior_results/moriond2013/smearing_sigma_and_errors_hcp2012.dat
 
 ## uncorrelated part of the uncertainties
 splitEresolSyst=0
-corr_smearing_file=smearing_sigma_corr_errors.dat
+corr_smearing_file=prior_results/moriond2013/smearing_sigma_corr_errors.dat
 
 ## jets
 recomputeBetas=0
