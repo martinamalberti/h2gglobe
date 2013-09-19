@@ -23,7 +23,6 @@ if len(argv)==2:
     else: outfile=open(argv[1][:argv[1].rfind("/")+1]+"tmp_"+argv[1][argv[1].rfind("/")+1:]+".pevents",'w')
 else: outfile=open(argv[1],'w')
 
-print outfile
 
 tfilelist = []
 for i in range(len(filelist)):
