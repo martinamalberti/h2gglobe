@@ -19,7 +19,7 @@ nDataBins=160
 ## Un-tagged categories
 nEtaCategories=2
 nR9Categories=2
-nPtCategories=0
+nPtCategories=1
 
 ##
 phoidMvaCut=-0.2
