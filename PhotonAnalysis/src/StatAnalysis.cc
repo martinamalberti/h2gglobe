@@ -1038,11 +1038,31 @@ bool StatAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, TLorentz
 	        }
 	    }
 
-	// priority of analysis: TTH leptonic, TTH hadronic, lepton tag, vbf,vh met, vhhad btag, vh had 0tag, 
+// 	// priority of analysis: TTH leptonic, TTH hadronic, lepton tag, vbf,vh met, vhhad btag, vh had 0tag, 
+// 	if (includeTTHlep&&TTHlepevent) {
+// 	    diphoton_id = diphotonTTHlep_id;
+// 	} else if(includeTTHhad&&TTHhadevent) {
+// 	    diphoton_id = diphotonTTHhad_id;
+// 	} else if(includeVHlep&&VHmuevent){
+//             diphoton_id = diphotonVHlep_id;
+//         } else if (includeVHlep&&VHelevent){
+//             diphoton_id = diphotonVHlep_id;
+//         } else if (includeVHlepPlusMet&&VHlep1event){
+//             diphoton_id = diphotonVHlep_id;
+//         } else if (includeVHlepPlusMet&&VHlep2event){
+//             diphoton_id = diphotonVHlep_id;
+//         } else if(includeVBF&&VBFevent) {
+//             diphoton_id = diphotonVBF_id;
+//         } else if(includeVHmet&&VHmetevent) {
+//             diphoton_id = diphotonVHmet_id;
+// 	} else if(includeVHhadBtag&&VHhadBtagevent) {
+// 	    diphoton_id = diphotonVHhadBtag_id;
+//         } else if(includeVHhad&&VHhadevent) {
+//             diphoton_id = diphotonVHhad_id;
+//         }
+	// priority of analysis: TTH leptonic, VH high met or dilepton, VH leptonic low met, vbf, vh met, TTH had, VH had btag, VH had 0tag, 
 	if (includeTTHlep&&TTHlepevent) {
 	    diphoton_id = diphotonTTHlep_id;
-	} else if(includeTTHhad&&TTHhadevent) {
-	    diphoton_id = diphotonTTHhad_id;
 	} else if(includeVHlep&&VHmuevent){
             diphoton_id = diphotonVHlep_id;
         } else if (includeVHlep&&VHelevent){
@@ -1055,11 +1075,14 @@ bool StatAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, TLorentz
             diphoton_id = diphotonVBF_id;
         } else if(includeVHmet&&VHmetevent) {
             diphoton_id = diphotonVHmet_id;
+	} else if(includeTTHhad&&TTHhadevent) {
+	    diphoton_id = diphotonTTHhad_id;
 	} else if(includeVHhadBtag&&VHhadBtagevent) {
 	    diphoton_id = diphotonVHhadBtag_id;
         } else if(includeVHhad&&VHhadevent) {
             diphoton_id = diphotonVHhad_id;
         }
+
         // End exclusive mode selection
     }
 
