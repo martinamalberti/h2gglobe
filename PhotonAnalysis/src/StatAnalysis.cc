@@ -1039,10 +1039,30 @@ bool StatAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, TLorentz
 	    }
 
 	// priority of analysis: TTH leptonic, TTH hadronic, lepton tag, vbf,vh met, vhhad btag, vh had 0tag, 
+// 	if (includeTTHlep&&TTHlepevent) {
+// 	    diphoton_id = diphotonTTHlep_id;
+// 	} else if(includeTTHhad&&TTHhadevent) {
+// 	    diphoton_id = diphotonTTHhad_id;
+// 	} else if(includeVHlep&&VHmuevent){
+//             diphoton_id = diphotonVHlep_id;
+//         } else if (includeVHlep&&VHelevent){
+//             diphoton_id = diphotonVHlep_id;
+//         } else if (includeVHlepPlusMet&&VHlep1event){
+//             diphoton_id = diphotonVHlep_id;
+//         } else if (includeVHlepPlusMet&&VHlep2event){
+//             diphoton_id = diphotonVHlep_id;
+//         } else if(includeVBF&&VBFevent) {
+//             diphoton_id = diphotonVBF_id;
+//         } else if(includeVHmet&&VHmetevent) {
+//             diphoton_id = diphotonVHmet_id;
+// 	} else if(includeVHhadBtag&&VHhadBtagevent) {
+// 	    diphoton_id = diphotonVHhadBtag_id;
+//         } else if(includeVHhad&&VHhadevent) {
+//             diphoton_id = diphotonVHhad_id;
+//         }
+	// priority of analysis: TTH leptonic, VH high met or dilepton, VH leptonic low met, vbf, vh met, TTH had, VH had btag, VH had 0tag, 
 	if (includeTTHlep&&TTHlepevent) {
 	    diphoton_id = diphotonTTHlep_id;
-	} else if(includeTTHhad&&TTHhadevent) {
-	    diphoton_id = diphotonTTHhad_id;
 	} else if(includeVHlep&&VHmuevent){
             diphoton_id = diphotonVHlep_id;
         } else if (includeVHlep&&VHelevent){
@@ -1055,6 +1075,8 @@ bool StatAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, TLorentz
             diphoton_id = diphotonVBF_id;
         } else if(includeVHmet&&VHmetevent) {
             diphoton_id = diphotonVHmet_id;
+	} else if(includeTTHhad&&TTHhadevent) {
+	    diphoton_id = diphotonTTHhad_id;
 	} else if(includeVHhadBtag&&VHhadBtagevent) {
 	    diphoton_id = diphotonVHhadBtag_id;
         } else if(includeVHhad&&VHhadevent) {
@@ -1595,10 +1617,6 @@ void StatAnalysis::computeExclusiveCategory(LoopAll & l, int & category, std::pa
 {
     if(TTHlepevent) {
 	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories +  nVHmetCategories;
-    }else if(TTHhadevent) {
-	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories + nVHmetCategories+nTTHlepCategories;
-	if(PADEBUG)
-	cout<<"TTHhad: "<<category<<endl;
     }else if(VHmuevent || VHlep1event) {
 	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories;
         if(nMuonCategories>1) category+=VHmuevent_cat;
@@ -1623,6 +1641,10 @@ void StatAnalysis::computeExclusiveCategory(LoopAll & l, int & category, std::pa
     } else if(VHmetevent) {
 	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories;
         if(nVHmetCategories>1) category+=VHmetevent_cat;
+    }else if(TTHhadevent) {
+	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories + nVHmetCategories+nTTHlepCategories;
+	if(PADEBUG)
+	cout<<"TTHhad: "<<category<<endl;
     } else if(VHhadBtagevent) {
 	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories + nVHmetCategories + nTTHlepCategories + nTTHhadCategories;
     } else if(VHhadevent) {
