@@ -62,7 +62,7 @@ void StatAnalysis::Term(LoopAll& l)
 
     std::string outputfilename = (std::string) l.histFileName;
     // Make Fits to the data-sets and systematic sets
-    std::string postfix=(dataIs2011?"":"_8TeV");
+    std::string postfix=Form("_%dTeV",l.sqrtS);
     l.rooContainer->FitToData("data_pol_model"+postfix,"data_mass");  // Fit to full range of dataset
 
     //    l.rooContainer->WriteSpecificCategoryDataCards(outputfilename,"data_mass","sig_mass","data_pol_model");
@@ -250,7 +250,7 @@ void StatAnalysis::Init(LoopAll& l)
     if(doKFactorSmear) {
         // kFactor efficiency
         std::cerr << __LINE__ << std::endl;
-        kFactorSmearer = new KFactorSmearer( kfacHist );
+        kFactorSmearer = new KFactorSmearer( kfacHist, l.signalNormalizer );
         kFactorSmearer->name("kFactor");
         kFactorSmearer->init();
         genLevelSmearers_.push_back(kFactorSmearer);
@@ -258,7 +258,7 @@ void StatAnalysis::Init(LoopAll& l)
     if(doPtSpinSmear) {
         // ptSpin efficiency
         std::cerr << __LINE__ << std::endl;
-        ptSpinSmearer = new PtSpinSmearer( ptspinHist );
+        ptSpinSmearer = new PtSpinSmearer( ptspinHist, l.signalNormalizer );
         ptSpinSmearer->name("ptSpin");
         ptSpinSmearer->init();
         genLevelSmearers_.push_back(ptSpinSmearer);
@@ -266,7 +266,7 @@ void StatAnalysis::Init(LoopAll& l)
     if(doInterferenceSmear) {
         // interference efficiency
         std::cerr << __LINE__ << std::endl;
-        interferenceSmearer = new InterferenceSmearer(2.5e-2,0.);
+        interferenceSmearer = new InterferenceSmearer( l.signalNormalizer, 2.5e-2,0.);
         genLevelSmearers_.push_back(interferenceSmearer);
     }
 
@@ -350,13 +350,13 @@ void StatAnalysis::Init(LoopAll& l)
     // SM Model
     for(size_t isig=0; isig<sigPointsToBook.size(); ++isig) {
         int sig = sigPointsToBook[isig];
-        l.rooContainer->AddConstant(Form("XSBR_ggh_%d",sig),l.signalNormalizer->GetXsection(double(sig),"ggh")*l.signalNormalizer->GetBR(double(sig)));
+        l.rooContainer->AddConstant(Form("XSBR_ggh_%d",sig),l.normalizer()->GetXsection(double(sig),"ggh")*l.normalizer()->GetBR(double(sig)));
     }
 
     // -----------------------------------------------------
     // Configurable background model
     // if no configuration was given, set some defaults
-    std::string postfix=(dataIs2011?"":"_8TeV");
+    std::string postfix=Form("_%dTeV",l.sqrtS);
 
     if( bkgPolOrderByCat.empty() ) {
         for(int i=0; i<nCategories_; i++){
@@ -634,7 +634,7 @@ bool StatAnalysis::Analysis(LoopAll& l, Int_t jentry)
     if (l.runZeeValidation) l.runCiC=true;
 
     // make sure that rho is properly set
-    if( dataIs2011 ) {
+    if( run7TeV4Xanalysis ) {
         l.version = 12;
     }
     if( l.version >= 13 && forcedRho < 0. ) {
@@ -836,10 +836,6 @@ bool StatAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, TLorentz
     int leadpho_ind=-1;
     int subleadpho_ind=-1;
 
-    bool VHmuevent_prov=false;
-    bool VHelevent_prov=false;
-    int Njet_lepcat = 0;
-
     if( ! skipSelection ) {
 
         // first apply corrections and smearing on the single photons
@@ -927,7 +923,7 @@ bool StatAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, TLorentz
         // lepton tag
         if(includeVHlep){
             //Add tighter cut on dr to tk
-            if(dataIs2011){
+            if(run7TeV4Xanalysis){
                 diphotonVHlep_id = l.DiphotonCiCSelection(l.phoSUPERTIGHT, l.phoSUPERTIGHT, leadEtVHlepCut, subleadEtVHlepCut, 4, false, &smeared_pho_energy[0], true, true );
                 if(l.pho_drtotk_25_99[l.dipho_leadind[diphotonVHlep_id]] < 1 || l.pho_drtotk_25_99[l.dipho_subleadind[diphotonVHlep_id]] < 1) diphotonVHlep_id = -1;
                 VHmuevent=MuonTag2011(l, diphotonVHlep_id, &smeared_pho_energy[0]);
@@ -942,28 +938,14 @@ bool StatAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, TLorentz
                 }
             }
         }
-
+	
         if(includeVHlepPlusMet){
             float eventweight = weight * genLevWeight;
             float myweight=1.;
             if(eventweight*sampleweight!=0) myweight=eventweight/sampleweight;
-            VHmuevent_prov=MuonTag2012B(l,diphotonVHlep_id,mu_ind,muVtx,VHmuevent_cat,&smeared_pho_energy[0],lep_sync,false,-0.2,eventweight,smeared_pho_weight,!isSyst);
-            int diphotonVH_ele_id=-1;
-            VHelevent_prov=ElectronTag2012B(l,diphotonVH_ele_id,el_ind,elVtx,VHelevent_cat,&smeared_pho_energy[0],lep_sync,false,-0.2,eventweight,smeared_pho_weight,!isSyst);
-            int vertex = -1;
-            if(VHmuevent_prov) vertex=muVtx;
-            if(!VHmuevent_prov && VHelevent_prov){
-                vertex =elVtx;
-                diphotonVHlep_id=diphotonVH_ele_id;
-            } 
-            if(VHmuevent_prov || VHelevent_prov){
-                Njet_lepcat = VHNumberOfJets(l, diphotonVHlep_id, vertex, VHelevent_prov, VHmuevent_prov, el_ind, mu_ind, &smeared_pho_energy[0]);
-                if(Njet_lepcat<3) l.VHNewLeptonCategorization(VHlep1event, VHlep2event, diphotonVHlep_id, vertex, VHelevent_prov, VHmuevent_prov, el_ind, mu_ind, &smeared_pho_energy[0], 45.0);
-            }
-            l.VHTwoMuonsEvents(VHlep1event, VHlep2event, diphotonVHlep_id, muVtx, &smeared_pho_energy[0], leadEtVHlepCut, subleadEtVHlepCut, applyPtoverM);
-            l.VHTwoElectronsEvents(VHlep1event, VHlep2event, diphotonVHlep_id, elVtx, &smeared_pho_energy[0], leadEtVHlepCut, subleadEtVHlepCut, applyPtoverM);
-        }
-
+	          VHLepTag2013(l, diphotonVHlep_id, VHlep1event, VHlep2event, false, mu_ind, muVtx, VHmuevent_cat, el_ind, elVtx, VHelevent_cat, &smeared_pho_energy[0], phoidMvaCut, eventweight, smeared_pho_weight, isSyst);
+	      }
+	
         //Met tag //met at analysis step
         if(includeVHmet){
             int met_cat=-1;
@@ -984,7 +966,7 @@ bool StatAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, TLorentz
                 float myweight=1.;
                 if(eventweight*sampleweight!=0) myweight=eventweight/sampleweight;
 
-                VBFevent= ( dataIs2011 ?
+                VBFevent= ( run7TeV4Xanalysis ?
                         VBFTag2011(l, diphotonVBF_id, &smeared_pho_energy[0], true, eventweight, myweight) :
                         VBFTag2012(vbfIjet1, vbfIjet2, l, diphotonVBF_id, &smeared_pho_energy[0], true, eventweight, myweight) )
                     ;
@@ -1107,7 +1089,7 @@ bool StatAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, TLorentz
 
         // save trees for unbinned datacards
         int inc_cat = l.DiphotonCategory(diphoton_index.first,diphoton_index.second,Higgs.Pt(),nEtaCategories,nR9Categories,R9CatBoundary,nPtCategories,nVtxCategories,l.vtx_std_n);
-        if (!isSyst && cur_type<0 && saveDatacardTrees_ && TMath::Abs(datacardTreeMass-l.signalNormalizer->GetMass(cur_type))<0.001) saveDatCardTree(l,cur_type,category, inc_cat, evweight, diphoton_index.first,diphoton_index.second,l.dipho_vtxind[diphoton_id],lead_p4,sublead_p4,true,GetSignalLabel(cur_type,l));
+        if (!isSyst && cur_type<0 && saveDatacardTrees_ && TMath::Abs(datacardTreeMass-l.normalizer()->GetMass(cur_type))<0.001) saveDatCardTree(l,cur_type,category, inc_cat, evweight, diphoton_index.first,diphoton_index.second,l.dipho_vtxind[diphoton_id],lead_p4,sublead_p4,true,GetSignalLabel(cur_type,l));
 
         float vtx_mva  = l.vtx_std_evt_mva->at(diphoton_id);
         float vtxProb   = 1.-0.49*(vtx_mva+1.0); /// should better use this: vtxAna_.setPairID(diphoton_id); vtxAna_.vertexProbability(vtx_mva); PM
@@ -1605,10 +1587,10 @@ void StatAnalysis::computeSpinCategory(LoopAll &l, int &category, TLorentzVector
     double cosTheta;
     int cosThetaCategory=-1;
     if (cosThetaDef=="CS"){
-        cosTheta = getCosThetaCS(lead_p4,sublead_p4);
+        cosTheta = getCosThetaCS(lead_p4,sublead_p4,l.sqrtS);
     }
     else if (cosThetaDef=="HX"){
-        cosTheta = getCosThetaHX(lead_p4,sublead_p4);
+        cosTheta = getCosThetaHX(lead_p4,sublead_p4,l.sqrtS);
     }
     else {
         cout << "ERROR -- cosThetaDef - " << cosThetaDef << " not recognised" << endl;
@@ -1876,81 +1858,23 @@ double StatAnalysis::GetDifferentialKfactor(double gPT, int Mass)
 
 void StatAnalysis::FillSignalLabelMap(LoopAll & l)
 {
-    std::map<int,std::pair<TString,double > > & signalMap = l.signalNormalizer->SignalType();
+    std::map<int,std::pair<TString,double > > & signalMap = l.normalizer()->SignalType();
 
     for( std::map<int,std::pair<TString,double > >::iterator it=signalMap.begin();
             it!=signalMap.end(); ++it ) {
         signalLabels[it->first] = it->second.first+Form("_mass_m%1.0f", it->second.second);
     }
-
-    /////////// // Basically A Map of the ID (type) to the signal's name which can be filled Now:
-    /////////// signalLabels[-57]="ggh_mass_m123";
-    /////////// signalLabels[-58]="vbf_mass_m123";
-    /////////// signalLabels[-60]="wzh_mass_m123";
-    /////////// signalLabels[-59]="tth_mass_m123";
-    /////////// signalLabels[-53]="ggh_mass_m121";
-    /////////// signalLabels[-54]="vbf_mass_m121";
-    /////////// signalLabels[-56]="wzh_mass_m121";
-    /////////// signalLabels[-55]="tth_mass_m121";
-    /////////// signalLabels[-65]="ggh_mass_m160";
-    /////////// signalLabels[-66]="vbf_mass_m160";
-    /////////// signalLabels[-68]="wzh_mass_m160";
-    /////////// signalLabels[-67]="tth_mass_m160";
-    /////////// signalLabels[-61]="ggh_mass_m155";
-    /////////// signalLabels[-62]="vbf_mass_m155";
-    /////////// signalLabels[-64]="wzh_mass_m155";
-    /////////// signalLabels[-63]="tth_mass_m155";
-    /////////// signalLabels[-49]="ggh_mass_m150";
-    /////////// signalLabels[-50]="vbf_mass_m150";
-    /////////// signalLabels[-52]="wzh_mass_m150";
-    /////////// signalLabels[-51]="tth_mass_m150";
-    /////////// signalLabels[-45]="ggh_mass_m145";
-    /////////// signalLabels[-46]="vbf_mass_m145";
-    /////////// signalLabels[-48]="wzh_mass_m145";
-    /////////// signalLabels[-47]="tth_mass_m145";
-    /////////// signalLabels[-33]="ggh_mass_m140";
-    /////////// signalLabels[-34]="vbf_mass_m140";
-    /////////// signalLabels[-36]="wzh_mass_m140";
-    /////////// signalLabels[-35]="tth_mass_m140";
-    /////////// signalLabels[-41]="ggh_mass_m135";
-    /////////// signalLabels[-42]="vbf_mass_m135";
-    /////////// signalLabels[-44]="wzh_mass_m135";
-    /////////// signalLabels[-43]="tth_mass_m135";
-    /////////// signalLabels[-29]="ggh_mass_m130";
-    /////////// signalLabels[-30]="vbf_mass_m130";
-    /////////// signalLabels[-32]="wzh_mass_m130";
-    /////////// signalLabels[-31]="tth_mass_m130";
-    /////////// signalLabels[-37]="ggh_mass_m125";
-    /////////// signalLabels[-38]="vbf_mass_m125";
-    /////////// signalLabels[-40]="wzh_mass_m125";
-    /////////// signalLabels[-39]="tth_mass_m125";
-    /////////// signalLabels[-25]="ggh_mass_m120";
-    /////////// signalLabels[-26]="vbf_mass_m120";
-    /////////// signalLabels[-28]="wzh_mass_m120";
-    /////////// signalLabels[-27]="tth_mass_m120";
-    /////////// signalLabels[-21]="ggh_mass_m115";
-    /////////// signalLabels[-22]="vbf_mass_m115";
-    /////////// signalLabels[-24]="wzh_mass_m115";
-    /////////// signalLabels[-23]="tth_mass_m115";
-    /////////// signalLabels[-17]="ggh_mass_m110";
-    /////////// signalLabels[-18]="vbf_mass_m110";
-    /////////// signalLabels[-19]="wzh_mass_m110";
-    /////////// signalLabels[-20]="tth_mass_m110";
-    /////////// signalLabels[-13]="ggh_mass_m105";
-    /////////// signalLabels[-14]="vbf_mass_m105";
-    /////////// signalLabels[-16]="wzh_mass_m105";
-    /////////// signalLabels[-15]="tth_mass_m105";
-    /////////// signalLabels[-69]="ggh_mass_m100";
-    /////////// signalLabels[-70]="vbf_mass_m100";
-    /////////// signalLabels[-72]="wzh_mass_m100";
-    /////////// signalLabels[-71]="tth_mass_m100";
 }
 
 std::string StatAnalysis::GetSignalLabel(int id, LoopAll &l){
 
     // For the lazy man, can return a memeber of the map rather than doing it yourself
     std::map<int,std::string>::iterator it = signalLabels.find(id);
-
+    if( it == signalLabels.end() ) {
+	std::string lab = Form("%s_mass_m%1.0f",l.signalNormalizer->GetProcess(id).Data(),l.signalNormalizer->GetMass(id));
+	it = signalLabels.insert( std::make_pair(id,lab) ).first;
+    }
+    
     if (it!=signalLabels.end()){
         if(!splitwzh){
             return it->second;
@@ -1977,7 +1901,7 @@ void StatAnalysis::rescaleClusterVariables(LoopAll &l){
     // Data-driven MC scalings
     for (int ipho=0;ipho<l.pho_n;ipho++){
 
-        if (dataIs2011) {
+        if (run7TeV4Xanalysis) {
 
             if( scaleR9Only ) {
                 double R9_rescale = (l.pho_isEB[ipho]) ? 1.0048 : 1.00492 ;
