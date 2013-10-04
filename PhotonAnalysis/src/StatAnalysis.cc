@@ -709,7 +709,7 @@ bool StatAnalysis::Analysis(LoopAll& l, Int_t jentry)
     
     // Analyse the event assuming nominal values of corrections and smearings
     float mass, evweight, diphotonMVA;
-    int diphoton_id, category;
+    int diphoton_id=-1, category=-1;
     bool isCorrectVertex;
     bool storeEvent = false;
     if( AnalyseEvent(l,jentry, weight, gP4, mass,  evweight, category, diphoton_id, isCorrectVertex,diphotonMVA) ) {
@@ -717,7 +717,7 @@ bool StatAnalysis::Analysis(LoopAll& l, Int_t jentry)
         FillRooContainer(l, cur_type, mass, diphotonMVA, category, evweight, isCorrectVertex, diphoton_id);
         storeEvent = true;
     }
-
+    
     // Systematics uncertaities for the binned model
     // We re-analyse the event several times for different values of corrections and smearings
     if( cur_type < 0 && doMCSmearing && doSystematics ) {
@@ -744,8 +744,8 @@ bool StatAnalysis::Analysis(LoopAll& l, Int_t jentry)
 
                     // re-analyse the event without redoing the event selection as we use nominal values for the single photon
                     // corrections and smearings
-                    AnalyseEvent(l, jentry, weight, gP4, syst_mass,  syst_weight, syst_category, diphoton_id, isCorrectVertex,syst_diphotonMVA,
-                            true, syst_shift, true, *si, 0, 0 );
+                    AnalyseEvent(l, jentry, weight, gP4, syst_mass,  syst_weight, syst_category, diphoton_id, isCorrectVertex,
+				 syst_diphotonMVA, true, syst_shift, true, *si, 0, 0 );
 
                     AccumulateSyst( cur_type, syst_mass, syst_diphotonMVA, syst_category, syst_weight,
                             mass_errors, mva_errors, categories, weights);
@@ -764,8 +764,8 @@ bool StatAnalysis::Analysis(LoopAll& l, Int_t jentry)
 
                     // re-analyse the event without redoing the event selection as we use nominal values for the single photon
                     // corrections and smearings
-                    AnalyseEvent(l,jentry, weight, gP4, syst_mass,  syst_weight, syst_category, diphoton_id, isCorrectVertex,syst_diphotonMVA,
-                            true, syst_shift, true,  0, 0, *si );
+                    AnalyseEvent(l,jentry, weight, gP4, syst_mass,  syst_weight, syst_category, diphoton_id, isCorrectVertex,
+				 syst_diphotonMVA, true, syst_shift, true,  0, 0, *si );
 
                     AccumulateSyst( cur_type, syst_mass, syst_diphotonMVA, syst_category, syst_weight,
                             mass_errors, mva_errors, categories, weights);
@@ -774,8 +774,9 @@ bool StatAnalysis::Analysis(LoopAll& l, Int_t jentry)
                 FillRooContainerSyst(l, (*si)->name(), cur_type, mass_errors, mva_errors, categories, weights, diphoton_id);
             }
         }
-
-        int diphoton_id_syst;
+	
+        int diphoton_id_syst=-1;
+	category=-1;
         // single photon level systematics: several
         for(std::vector<BaseSmearer *>::iterator  si=systPhotonSmearers_.begin(); si!= systPhotonSmearers_.end(); ++si ) {
             mass_errors.clear(), weights.clear(), categories.clear(), mva_errors.clear();
@@ -785,14 +786,14 @@ bool StatAnalysis::Analysis(LoopAll& l, Int_t jentry)
                 syst_mass     =  0., syst_category = -1, syst_weight   =  0.;
 
                 // re-analyse the event redoing the event selection this time
-                AnalyseEvent(l,jentry, weight, gP4, syst_mass,  syst_weight, syst_category, diphoton_id_syst, isCorrectVertex,syst_diphotonMVA,
-                        true, syst_shift, false,  0, *si, 0 );
-
+                AnalyseEvent(l,jentry, weight, gP4, syst_mass,  syst_weight, syst_category, diphoton_id_syst, isCorrectVertex,
+			     syst_diphotonMVA, true, syst_shift, false,  0, *si, 0 );
+		
                 AccumulateSyst( cur_type, syst_mass, syst_diphotonMVA, syst_category, syst_weight,
                         mass_errors, mva_errors, categories, weights);
             }
-
-            FillRooContainerSyst(l, (*si)->name(), cur_type, mass_errors, mva_errors, categories, weights, diphoton_id);
+	    
+            FillRooContainerSyst(l, (*si)->name(), cur_type, mass_errors, mva_errors, categories, weights, diphoton_id_syst);
         }
     }
 
@@ -863,7 +864,7 @@ bool StatAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, TLorentz
 	    float leadptcut=33.;
 	    float subleadptcut=25.;
 	    //	    cout<<"[DEBUG]:before"<<diphoton_id<<endl;
-	    diphoton_id=l.DiphotonMITPreSelection(leadptcut,subleadptcut,-0.2,0, &smeared_pho_energy[0],false,false,-100,0,false);
+	    diphoton_id=l.DiphotonMITPreSelection(bdtTrainingType.c_str(),leadptcut,subleadptcut,-0.2,0, &smeared_pho_energy[0],false,false,-100,0,false);
 	    //	    cout<<"[DEBUG]:after"<<diphoton_id<<endl;
 
 	    string bdtTrainingPhilosophy="MIT";
@@ -1543,42 +1544,45 @@ void StatAnalysis::FillRooContainerSyst(LoopAll& l, const std::string &name, int
 }
 
 // ----------------------------------------------------------------------------------------------------
-void StatAnalysis::computeExclusiveCategory(LoopAll & l, int & category, std::pair<int,int> diphoton_index, float pt, float diphobdt_output)
+void StatAnalysis::computeExclusiveCategory(LoopAll & l, int & category, std::pair<int,int> diphoton_index, float pt, float diphobdt_output, bool mvaselection)
 {
     if(TTHlepevent) {
-	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories +  nVHmetCategories;
+        category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories +  nVHmetCategories;
     } else if(VHmuevent || VHlep1event) {
-	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories;
+        category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories;
         if(nMuonCategories>1) category+=VHmuevent_cat;
     } else if(VHelevent || VHlep2event) {
-	    category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories + nMuonCategories;
+        category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories + nMuonCategories;
         if(nElectronCategories>1) category+=VHelevent_cat;
     } else if(VBFevent) {
-	category=nInclusiveCategories_;
-	if( mvaVbfSelection ) {
-	    if (!multiclassVbfSelection) {
-		category += categoryFromBoundaries(mvaVbfCatBoundaries, myVBF_MVA);
-	    } else if ( vbfVsDiphoVbfSelection ) {
-		    category += categoryFromBoundaries2D(multiclassVbfCatBoundaries0, multiclassVbfCatBoundaries1, multiclassVbfCatBoundaries2, myVBF_MVA, diphobdt_output, 1.);
-	    } else {
-		    category += categoryFromBoundaries2D(multiclassVbfCatBoundaries0, multiclassVbfCatBoundaries1, multiclassVbfCatBoundaries2, myVBF_MVA0, myVBF_MVA1, myVBF_MVA2);
-	    }
-	    }
- 	    else {
-	    category += l.DiphotonCategory(diphoton_index.first,diphoton_index.second,pt,nVBFEtaCategories,1,1)
-		+ nVBFEtaCategories*l.DijetSubCategory(myVBF_Mjj,myVBFLeadJPt,myVBFSubJPt,nVBFDijetJetCategories);
-	}
+        category=nInclusiveCategories_;
+        if(combinedmvaVbfSelection) {
+            int vbfcat=-1;
+            vbfcat=categoryFromBoundaries2D(multiclassVbfCatBoundaries0,multiclassVbfCatBoundaries1,multiclassVbfCatBoundaries2,
+                                            myVBF_MVA,                  myVBFcombined,              1);
+            category += vbfcat;
+        } else if( mvaVbfSelection ) {
+            if (!multiclassVbfSelection) {
+                category += categoryFromBoundaries(mvaVbfCatBoundaries, myVBF_MVA);
+            } else if ( vbfVsDiphoVbfSelection ) {
+                category += categoryFromBoundaries2D(multiclassVbfCatBoundaries0, multiclassVbfCatBoundaries1, multiclassVbfCatBoundaries2, myVBF_MVA, diphobdt_output, 1.);
+            } else {
+                category += categoryFromBoundaries2D(multiclassVbfCatBoundaries0, multiclassVbfCatBoundaries1, multiclassVbfCatBoundaries2, myVBF_MVA0, myVBF_MVA1, myVBF_MVA2);
+            }
+        } else {
+            category += l.DiphotonCategory(diphoton_index.first,diphoton_index.second,pt,nVBFEtaCategories,1,1)
+                + nVBFEtaCategories*l.DijetSubCategory(myVBF_Mjj,myVBFLeadJPt,myVBFSubJPt,nVBFDijetJetCategories);
+        }
     } else if(VHmetevent) {
-	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories;
+        category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories;
         if(nVHmetCategories>1) category+=VHmetevent_cat;
     } else if(TTHhadevent) {
-	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories + nVHmetCategories+nTTHlepCategories;
-	if(PADEBUG)
-	cout<<"TTHhad: "<<category<<endl;
+        category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories + nVHmetCategories+nTTHlepCategories;
+        if(PADEBUG) cout<<"TTHhad: "<<category<<endl;
     }else if(VHhadBtagevent) {
-	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories + nVHmetCategories + nTTHlepCategories + nTTHhadCategories;
+        category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories + nVHmetCategories + nTTHlepCategories + nTTHhadCategories;
     } else if(VHhadevent) {
-	category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories + nVHmetCategories + nTTHlepCategories + nTTHhadCategories+nVHhadBtagCategories;
+        category=nInclusiveCategories_ + ( (int)includeVBF )*nVBFCategories +  nVHlepCategories + nVHmetCategories + nTTHlepCategories + nTTHhadCategories+nVHhadBtagCategories;
     }
 }
 
@@ -1608,28 +1612,6 @@ void StatAnalysis::computeSpinCategory(LoopAll &l, int &category, TLorentzVector
 
     if (cosThetaCategory==-1) category=-1;
     else category = (category*nCosThetaCategories)+cosThetaCategory;
-}
-
-int StatAnalysis::categoryFromBoundaries(std::vector<float> & v, float val)
-{
-    if( val == v[0] ) { return 0; }
-    std::vector<float>::iterator bound =  lower_bound( v.begin(), v.end(), val, std::greater<float>  ());
-    int cat = ( val >= *bound ? bound - v.begin() - 1 : bound - v.begin() );
-    if( cat >= v.size() - 1 ) { cat = -1; }
-    return cat;
-}
-
-int StatAnalysis::categoryFromBoundaries2D(std::vector<float> & v1, std::vector<float> & v2, std::vector<float> & v3, float val1, float val2, float val3 )
-{
-    int cat1temp =  categoryFromBoundaries(v1,val1);
-    int cat2temp =  categoryFromBoundaries(v2,val2);
-    int cat3temp =  categoryFromBoundaries(v3,val3);
-    std::vector<int> vcat;
-    vcat.push_back(cat1temp);
-    vcat.push_back(cat2temp);
-    vcat.push_back(cat3temp);
-    int cat = *max_element(vcat.begin(), vcat.end());
-    return cat;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -1792,7 +1774,7 @@ void StatAnalysis::fillSignalEfficiencyPlots(float weight, LoopAll & l)
 {
     //Fill histograms to use as denominator (kinematic pre-selection only) and numerator (selection applied)
     //for single photon ID efficiency calculation.
-    int diphoton_id_kinpresel = l.DiphotonMITPreSelection(leadEtCut,subleadEtCut,-1.,applyPtoverM, &smeared_pho_energy[0],false,true,-100,-1,false );
+    int diphoton_id_kinpresel = l.DiphotonMITPreSelection(bdtTrainingType.c_str(),leadEtCut,subleadEtCut,-1.,applyPtoverM, &smeared_pho_energy[0],false,true,-100,-1,false );
     if (diphoton_id_kinpresel>-1) {
 
         TLorentzVector lead_p4, sublead_p4, Higgs;
@@ -2020,6 +2002,23 @@ void StatAnalysis::fillOpTree(LoopAll& l, const TLorentzVector & lead_p4, const 
     if(VBFevent){
         vbfcat=l.DijetSubCategory(myVBF_Mjj,myVBFLeadJPt,myVBFSubJPt,nVBFDijetJetCategories);
     }
+
+    Float_t njets10=0., njets15=0., njets20=0.;
+    for (Int_t i=0; i<l.jet_algoPF1_n; i++) {
+	Float_t et = ((TLorentzVector*)l.jet_algoPF1_p4->At(i))->Et();
+        
+	if (et > 10.)
+	    njets10 += 1.;
+	if (et > 15.)
+	    njets15 += 1.;
+	if (et > 20.)
+	    njets20 += 1.;
+    }
+
+    l.FillTree("njets10", njets10);
+    l.FillTree("njets15", njets15);
+    l.FillTree("njets20", njets20);
+
 
     if (vbfIjet1 != -1 && vbfIjet2 !=-1) {
         TLorentzVector* jet1 = (TLorentzVector*)l.jet_algoPF1_p4->At(vbfIjet1);
