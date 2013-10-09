@@ -33,8 +33,8 @@ doTriggerSelection=1
 reRunCiCForData=1
 
 # options for applying Fabians corrections
-applyIdmvaCorrection=1
-applySigmaECorrection=1
+applyIdmvaCorrection=0
+applySigmaECorrection=0
 
 ## Moved to analysis_settings.dat
 ### leadEtVBFCut=55
@@ -109,8 +109,8 @@ doR9Syst=0
 doKFactorSmear=0
 doKFactorSyst=0
 
-doPdfWeightSmear=1
-doPdfWeightSyst=1
+doPdfWeightSmear=0
+doPdfWeightSyst=0
 
 doInterferenceSmear=1
 

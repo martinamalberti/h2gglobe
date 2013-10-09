@@ -2057,7 +2057,7 @@ bool PhotonAnalysis::SelectEventsReduction(LoopAll& l, int jentry)
     if( forcedRho >= 0. ) {
         l.rho = forcedRho;
     } else {
-	l.rho = l.rho_algo1;
+        l.rho = l.rho_algo1;
     }
     
     l.FillCICInputs();
@@ -3901,7 +3901,7 @@ int PhotonAnalysis::categoryFromBoundaries(std::vector<float> & v, float val)
     else {
         // bound is pointer to the ith boundary in v such that val>v[i]
         std::vector<float>::iterator bound =  lower_bound( v.begin(), v.end(), val, std::greater<float>  ());
-        int cat = ( val >= *bound ? bound - v.begin() - 1 : bound - v.begin() );
+        cat = ( val >= *bound ? bound - v.begin() - 1 : bound - v.begin() );
         if( cat >= v.size() - 1 ) { cat = -1; }
     }
     return cat;
@@ -5702,7 +5702,10 @@ void PhotonAnalysis::GetRegressionCorrectionsV8(LoopAll &l){
     // V7 7TeV Endcap use
     for (int ipho=0;ipho<l.pho_n;ipho++){
         double ecor,ecorerr;
-        TVector3 *sc = ((TVector3*)l.pho_calopos->At(ipho)); 
+    
+        int sc_index = l.pho_scind[ipho];
+
+        TVector3 *sc = ((TVector3*)l.sc_xyz->At(sc_index)); 
         bool isbarrel = (fabs(sc->Eta())<1.48);
      
         if (isbarrel){
@@ -5723,9 +5726,9 @@ void PhotonAnalysis::GetSinglePhotonRegressionCorrectionV7(LoopAll &l, int ipho,
     double phoE = ((TLorentzVector*)l.pho_p4->At(ipho))->Energy();
     double r9=l.pho_r9[ipho];
 
-    TVector3 *sc = ((TVector3*)l.pho_calopos->At(ipho)); 
-
     int sc_index      = l.pho_scind[ipho];
+    TVector3 *sc = ((TVector3*)l.sc_xyz->At(sc_index)); 
+
     int sc_seed_index = l.sc_bcseedind[sc_index];
 
     TVector3 *bcpos =(TVector3*)l.bc_xyz->At(sc_seed_index);
@@ -5738,8 +5741,8 @@ void PhotonAnalysis::GetSinglePhotonRegressionCorrectionV7(LoopAll &l, int ipho,
     _vals[3] = l.sc_seta[sc_index];
     _vals[4] = l.sc_sphi[sc_index];
     _vals[5] = (double)l.sc_nbc[sc_index];
-    _vals[6] = l.pho_hoe[ipho];//p.hadTowOverEm();
-    _vals[7] = l.rho;
+    _vals[6] = l.pho_hoe_bc[ipho];//p.hadTowOverEm();
+    _vals[7] = l.rho_algo1;
     _vals[8] = (double)l.vtx_std_n;//double(vtxcol.size());
 
     //seed basic cluster variables
@@ -5829,9 +5832,9 @@ void PhotonAnalysis::GetSinglePhotonRegressionCorrectionV6(LoopAll &l, int ipho,
     double phoE = ((TLorentzVector*)l.pho_p4->At(ipho))->Energy();
     double r9=l.pho_r9[ipho];
 
-    TVector3 *sc = ((TVector3*)l.pho_calopos->At(ipho)); 
-
     int sc_index      = l.pho_scind[ipho];
+    TVector3 *sc = ((TVector3*)l.sc_xyz->At(sc_index)); 
+
     int sc_seed_index = l.sc_bcseedind[sc_index];
 
     TVector3 *bcpos =(TVector3*)l.bc_xyz->At(sc_seed_index);
@@ -5845,8 +5848,8 @@ void PhotonAnalysis::GetSinglePhotonRegressionCorrectionV6(LoopAll &l, int ipho,
     _vals[4] = l.sc_seta[sc_index];
     _vals[5] = l.sc_sphi[sc_index];
     _vals[6] = (double)l.sc_nbc[sc_index];
-    _vals[7] = l.pho_hoe[ipho];//p.hadTowOverEm();
-    _vals[8] = l.rho;
+    _vals[7] = l.pho_hoe_bc[ipho];//p.hadTowOverEm();
+    _vals[8] = l.rho_algo1;
     _vals[9] = (double)l.vtx_std_n;//double(vtxcol.size());
 
     //seed basic cluster variables
@@ -5939,11 +5942,10 @@ void PhotonAnalysis::GetRegressionCorrectionsV5(LoopAll &l){
         double phoE = ((TLorentzVector*)l.pho_p4->At(ipho))->Energy();
         double r9=l.pho_r9[ipho];
 
-        TVector3 *sc = ((TVector3*)l.pho_calopos->At(ipho)); 
-
         int sc_index      = l.pho_scind[ipho];
         int sc_seed_index = l.sc_bcseedind[sc_index];
 
+        TVector3 *sc = ((TVector3*)l.sc_xyz->At(sc_index)); 
         TVector3 *bcpos =(TVector3*)l.bc_xyz->At(sc_seed_index);
         double bcE = ((TLorentzVector*)l.bc_p4->At(sc_seed_index))->Energy();
 
@@ -5958,8 +5960,8 @@ void PhotonAnalysis::GetRegressionCorrectionsV5(LoopAll &l){
         _vals[3] = l.sc_seta[sc_index];
         _vals[4] = l.sc_sphi[sc_index];
         _vals[5] = (double)l.sc_nbc[sc_index];
-        _vals[6] = l.pho_hoe[ipho];//p.hadTowOverEm();
-        _vals[7] = l.rho;
+        _vals[6] = l.pho_hoe_bc[ipho];//p.hadTowOverEm();
+        _vals[7] = l.rho_algo1;
         _vals[8] = (double)l.vtx_std_n;//double(vtxcol.size());
 
         //seed basic cluster variables
@@ -5980,7 +5982,7 @@ void PhotonAnalysis::GetRegressionCorrectionsV5(LoopAll &l){
         double be3x3 = l.bc_s9[sc_seed_index];//clustertools.e5x5(*b);
 
         _vals[9] = bcpos->Eta()-sc->Eta();
-        _vals[10] = l.DeltaPhi(bcpos->Phi(),sc->Phi());
+        _vals[10] = bcpos->DeltaPhi(*sc);
         _vals[11] = bcE/l.sc_raw[sc_index];
         _vals[12] = be3x3/be5x5;
         _vals[13] = l.bc_sieie[sc_seed_index]; //sigietaieta (this is stored in bc collection)
@@ -6014,11 +6016,12 @@ void PhotonAnalysis::GetRegressionCorrectionsV5(LoopAll &l){
             _vals[33] = biphi%20; //module boundary phi symmetry
             _vals[34] = l.pho_betacry[ipho];//betacry; //local coordinates with respect to closest crystal center at nominal shower depth
             _vals[35] = l.pho_phicry[ipho];//bphicry;
-
+            
         }
         else {
             //preshower energy ratio (endcap only)
             _vals[27]  = l.sc_pre[sc_index]/l.sc_raw[sc_index];
+            
         }
 
         double den;
