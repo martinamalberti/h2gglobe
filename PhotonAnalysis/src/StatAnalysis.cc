@@ -2077,6 +2077,8 @@ void StatAnalysis::fillOpTree(LoopAll& l, const TLorentzVector & lead_p4, const 
     l.FillTree("dipho_pt", (float)Higgs.Pt());
     l.FillTree("full_cat", (float)category);
 
+    l.FillTree("e1", (float)lead_p4.E());
+    l.FillTree("e2", (float)sublead_p4.E());
     l.FillTree("et1", (float)lead_p4.Et());
     l.FillTree("et2", (float)sublead_p4.Et());
     l.FillTree("eta1", (float)lead_p4.Eta());
