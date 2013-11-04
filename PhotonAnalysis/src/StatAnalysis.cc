@@ -148,7 +148,7 @@ void StatAnalysis::Init(LoopAll& l)
     if( nPtCategories != 0 ) nInclusiveCategories_ *= nPtCategories;
 
     // scale R9 for CiC only?
-    if( scaleR9ForCicOnly ) {
+    if( scaleR9ForCicOnly && l.itype[l.current]!=0) {
 	l.pho_r9_cic = &corrected_pho_r9[0];
     }
     nPhotonCategories_ = nEtaCategories;
