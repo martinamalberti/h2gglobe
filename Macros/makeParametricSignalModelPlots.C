@@ -445,6 +445,7 @@ int getBestFitFunction(RooMultiPdf *bkg, RooAbsData *data, RooCategory *cat, boo
 
 	double global_minNll = 1E10;
 	int best_index = 0;
+	cat->Print("v");
 	int number_of_indeces = cat->numTypes();
 	
 	RooArgSet snap,clean;
@@ -645,8 +646,18 @@ pair<double,double> bkgEvPerGeV(RooWorkspace *work, int m_hyp, int cat, pair<dou
 		RooMultiPdf *mpdf;
 		if (is2011) mpdf = (RooMultiPdf*)work->pdf(Form("CMS_hgg_cat%d_7TeV_bkgshape",cat));
 		else mpdf = (RooMultiPdf*)work->pdf(Form("CMS_hgg_cat%d_8TeV_bkgshape",cat));
-		RooCategory *mcat = (RooCategory*)work->cat(Form("pdfindex_%d",cat));
+		RooCategory *mcat;
+		if (is2011)  mcat = (RooCategory*)work->cat(Form("pdfindex_%d_7TeV",cat));
+		else mcat = (RooCategory*)work->cat(Form("pdfindex_%d_8TeV",cat));
 		RooAbsData *data = (RooDataSet*)work->data(Form("roohist_data_mass_cat%d",cat));
+		if (!mcat) {
+			cout << "Category is NULL" << endl;
+			exit(1);
+		}
+		if (!data){
+			cout << "Data is NULL" << endl;
+			exit(1);
+		}
 		
 		// reset to best fit
 		int bf = getBestFitFunction(mpdf,data,mcat,true);
@@ -701,7 +712,9 @@ double sobInFWHM(RooWorkspace *sigWS, RooWorkspace *bkgWS, int m_hyp, int cat, d
 		RooMultiPdf *mpdf;
 		if (is2011) mpdf = (RooMultiPdf*)bkgWS->pdf(Form("CMS_hgg_cat%d_7TeV_bkgshape",cat));
 		else mpdf = (RooMultiPdf*)bkgWS->pdf(Form("CMS_hgg_cat%d_8TeV_bkgshape",cat));
-		RooCategory *mcat = (RooCategory*)bkgWS->cat(Form("pdfindex_%d",cat));
+		RooCategory *mcat;
+		if (is2011) mcat = (RooCategory*)bkgWS->cat(Form("pdfindex_%d_7TeV",cat));
+		else mcat = (RooCategory*)bkgWS->cat(Form("pdfindex_%d_8TeV",cat));
 		data = (RooDataSet*)bkgWS->data(Form("roohist_data_mass_cat%d",cat));
 		// reset to best fit
 		int bf = getBestFitFunction(mpdf,data,mcat,true);
@@ -835,7 +848,7 @@ vector<double> sigEvents(RooWorkspace *work, int m_hyp, int cat, string binnedSi
 pair<double,double> datEvents(RooWorkspace *work, int m_hyp, int cat, pair<double,double> &runningTotal){
   
   vector<double> result;
-  RooDataSet *data = (RooDataSet*)work->data(Form("data_mass_cat%d",cat));
+  RooDataSet *data = (RooDataSet*)work->data(Form("roohist_data_mass_cat%d",cat));
   double evs = data->numEntries();
   double evsPerGev;
   evsPerGev = data->sumEntries(Form("CMS_hgg_mass>=%4.1f && CMS_hgg_mass<%4.1f",double(m_hyp)-0.5,double(m_hyp)+0.5));
@@ -845,7 +858,7 @@ pair<double,double> datEvents(RooWorkspace *work, int m_hyp, int cat, pair<doubl
 }
 
 // from p. meridiani with addition from m. kenzie
-void makeSignalCompositionPlot(int nCats, map<string,string> labels, map<string,vector<double> > sigVals, map<string,double> sigEffs, map<string,double> fwhms, map<string,double> sobVals, string outfname, int mh, bool doBkgAndData, bool splitVH, bool isMassFac){
+void makeSignalCompositionPlot(int nCats, map<string,string> labels, map<string,vector<double> > sigVals, map<string,double> sigEffs, map<string,double> fwhms, map<string,double> sobVals, string outfname, int mh, bool doBkgAndData, bool splitVH, bool isMassFac, bool is2011){
 
   TString catName[nCats+1];
 	for (int cat=0; cat<nCats; cat++) catName[cat] = labels[Form("cat%d",cat)];
@@ -1031,11 +1044,17 @@ void makeSignalCompositionPlot(int nCats, map<string,string> labels, map<string,
     tex_m->DrawLatex(0.78,0.84+0.025,"ttH");
   }
 
-	int nIncCats=4;
+	int nIncCats=8;
 	int nVBFCats=2;
 	if (isMassFac){
-		nIncCats=5;
-		nVBFCats=3;
+		if (is2011) {
+			nIncCats=4;
+			nVBFCats=2;
+		}
+		else {
+			nIncCats=5;
+			nVBFCats=3;
+		}
 	}
   TLine *line = new TLine(0,nCats-nIncCats+0.5,100,nCats-nIncCats+0.5);
   line->SetLineColor(kBlack);
@@ -1388,36 +1407,67 @@ void makeParametricSignalModelPlots(string sigFitFileName, string outPathName, i
 		labels.insert(pair<string,string>("cat1","Untagged 1"));
 		labels.insert(pair<string,string>("cat2","Untagged 2"));
 		labels.insert(pair<string,string>("cat3","Untagged 3"));
-		labels.insert(pair<string,string>("cat4","Untagged 4"));
-		labels.insert(pair<string,string>("cat5","Dijet Tag 0"));
-		labels.insert(pair<string,string>("cat6","Dijet Tag 1"));
-		labels.insert(pair<string,string>("cat7","Dijet Tag 2"));
-		labels.insert(pair<string,string>("cat8","VH Lepton Tight"));
-		labels.insert(pair<string,string>("cat9","VH Lepton Loose"));
-		labels.insert(pair<string,string>("cat10","VH MET Tag"));     
-		labels.insert(pair<string,string>("cat11","ttH Leptonic Tag"));
-		labels.insert(pair<string,string>("cat12","ttH Hadronic Tag"));
-		labels.insert(pair<string,string>("cat13","VH Hadronic Tag"));
+		if (is2011) {
+			labels.insert(pair<string,string>("cat4","Dijet Tag 0"));
+			labels.insert(pair<string,string>("cat5","Dijet Tag 1"));
+			labels.insert(pair<string,string>("cat6","VH Lepton Tight"));
+			labels.insert(pair<string,string>("cat7","VH Lepton Loose"));
+			labels.insert(pair<string,string>("cat8","VH MET Tag"));     
+			labels.insert(pair<string,string>("cat9","ttH Lep+Had Tag"));
+			labels.insert(pair<string,string>("cat10","VH Hadronic Tag"));
+		}
+		else {
+			labels.insert(pair<string,string>("cat4","Untagged 4"));
+			labels.insert(pair<string,string>("cat5","Dijet Tag 0"));
+			labels.insert(pair<string,string>("cat6","Dijet Tag 1"));
+			labels.insert(pair<string,string>("cat7","Dijet Tag 2"));
+			labels.insert(pair<string,string>("cat8","VH Lepton Tight"));
+			labels.insert(pair<string,string>("cat9","VH Lepton Loose"));
+			labels.insert(pair<string,string>("cat10","VH MET Tag"));     
+			labels.insert(pair<string,string>("cat11","ttH Leptonic Tag"));
+			labels.insert(pair<string,string>("cat12","ttH Hadronic Tag"));
+			labels.insert(pair<string,string>("cat13","VH Hadronic Tag"));
+		}
 		labels.insert(pair<string,string>("all","Combined"));
 	}
 	else {
+<<<<<<< HEAD
+		labels.insert(pair<string,string>("cat0","Untagged 0 (High p_{t})"));
+		labels.insert(pair<string,string>("cat1","Untagged 1 (High p_{t})"));
+		labels.insert(pair<string,string>("cat2","Untagged 2 (High p_{t})"));
+		labels.insert(pair<string,string>("cat3","Untagged 3 (High p_{t})"));
+		labels.insert(pair<string,string>("cat4","Untagged 4 (Low p_{t})"));
+		labels.insert(pair<string,string>("cat5","Untagged 5 (Low p_{t})"));
+		labels.insert(pair<string,string>("cat6","Untagged 6 (Low p_{t})"));
+		labels.insert(pair<string,string>("cat7","Untagged 7 (Low p_{t})"));
+		labels.insert(pair<string,string>("cat8","Dijet Tag Tight"));
+		labels.insert(pair<string,string>("cat9","Dijet Tag Loose"));
+		labels.insert(pair<string,string>("cat10","VH Lepton Tight"));
+		labels.insert(pair<string,string>("cat11","VH Lepton Loose"));
+		labels.insert(pair<string,string>("cat12","VH MET Tag"));
+=======
 		labels.insert(pair<string,string>("cat0","Untagged 0"));
 		labels.insert(pair<string,string>("cat1","Untagged 1"));
 		labels.insert(pair<string,string>("cat2","Untagged 2"));
 		labels.insert(pair<string,string>("cat3","Untagged 3"));
+		labels.insert(pair<string,string>("cat0","Untagged 4"));
+		labels.insert(pair<string,string>("cat1","Untagged 5"));
+		labels.insert(pair<string,string>("cat2","Untagged 6"));
+		labels.insert(pair<string,string>("cat3","Untagged 7"));
 		labels.insert(pair<string,string>("cat4","Dijet Tag Tight"));
 		labels.insert(pair<string,string>("cat5","Dijet Tag Loose"));
 		labels.insert(pair<string,string>("cat6","VH Lepton Tight"));
 		labels.insert(pair<string,string>("cat7","VH Lepton Loose"));
 		labels.insert(pair<string,string>("cat8","VH MET Tag"));
+>>>>>>> b8dc30396c0c813a1528778cf54e7bb1b5f00d0e
 		if (is2011) {
-			labels.insert(pair<string,string>("cat9","ttH Lep+Had Tag"));
-			labels.insert(pair<string,string>("cat10","VH Hadronic Tag"));
+			labels.insert(pair<string,string>("cat13","ttH Lep+Had Tag"));
+			labels.insert(pair<string,string>("cat14","VH Hadronic Tag"));
 		}
 		else {
-			labels.insert(pair<string,string>("cat9","ttH Leptonic Tag"));
-			labels.insert(pair<string,string>("cat10","ttH Hadronic Tag"));
-			labels.insert(pair<string,string>("cat11","VH Hadronic Tag"));
+			labels.insert(pair<string,string>("cat13","ttH Leptonic Tag"));
+			labels.insert(pair<string,string>("cat14","ttH Hadronic Tag"));
+			labels.insert(pair<string,string>("cat15","VH Hadronic Tag"));
 		}
 		labels.insert(pair<string,string>("all","Combined"));
 	}
@@ -1591,7 +1641,7 @@ void makeParametricSignalModelPlots(string sigFitFileName, string outPathName, i
     }
     fclose(nfile);
     fclose(file);
-    makeSignalCompositionPlot(ncats,labels,sigVals,sigEffs,fwhms,sobVals,Form("%s/signalComposition",outPathName.c_str()),m_hyp,doBkgAndData,splitVH,isMassFac);
+    makeSignalCompositionPlot(ncats,labels,sigVals,sigEffs,fwhms,sobVals,Form("%s/signalComposition",outPathName.c_str()),m_hyp,doBkgAndData,splitVH,isMassFac,is2011);
     system(Form("cat %s/table.txt",outPathName.c_str()));
     cout << "-->" << endl;
     cout << Form("--> LaTeX version of this table has been written to %s/table.tex",outPathName.c_str()) << endl;

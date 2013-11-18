@@ -20,11 +20,15 @@ parser.add_option("-m","--method",dest="method",type="string",help="Method to ru
 parser.add_option("-l","--legend",dest="legend",type="string",help="Legend position - x1,y1,x2,y2")
 parser.add_option("-x","--xaxis",dest="xaxis",type="string",help="x-axis range - x1,x2")
 parser.add_option("-y","--yaxis",dest="yaxis",type="string",help="y-axis range - y1,y2")
+parser.add_option("--xbinning",dest="xbinning",type="string",help="force x binning (b,l,h)")
+parser.add_option("--ybinning",dest="ybinning",type="string",help="force y binning (b,l,h)")
 parser.add_option("","--limit",dest="limit",default=False,action="store_true",help="Do limit plot")
 parser.add_option("","--pval",dest="pval",default=False,action="store_true",help="Do p-value plot")
 parser.add_option("","--maxlh",dest="maxlh",default=False,action="store_true",help="Do best fit mu plot")
 parser.add_option("","--mh",dest="mh",default=False,action="store_true",help="Do NLL mass scan plot")
 parser.add_option("","--mu",dest="mu",default=False,action="store_true",help="Do NLL mu scan plot")
+parser.add_option("","--rv",dest="rv",default=False,action="store_true",help="Do NLL rv scan plot")
+parser.add_option("","--rf",dest="rf",default=False,action="store_true",help="Do NLL rf scan plot")
 parser.add_option("","--mumh",dest="mumh",default=False,action="store_true",help="Do NLL mu vs mh scan plot")
 parser.add_option("","--rvrf",dest="rvrf",default=False,action="store_true",help="Do NLL rv vs rf scan plot")
 parser.add_option("-v","--verbose",dest="verbose",default=False,action="store_true")
@@ -37,11 +41,13 @@ if options.pval: options.method='pval'
 if options.maxlh: options.method='maxlh'
 if options.mh: options.method='mh'
 if options.mu: options.method='mu'
+if options.rv: options.method='rv'
+if options.rf: options.method='rf'
 if options.mumh: options.method='mumh'
 if options.rvrf: options.method='rvrf'
 if not options.outname: options.outname=options.method
 
-allowed_methods=['pval','limit','maxlh','mh','mu','mumh','rvrf']
+allowed_methods=['pval','limit','maxlh','mh','mu','mumh','rv','rf','rvrf']
 if not options.datfile and options.method not in allowed_methods:
   print 'Invalid method. Must set one of: ', allowed_methods
   sys.exit()
@@ -64,7 +70,7 @@ dummyHist.SetTitleOffset(0.75,"Y")
 lat = r.TLatex()
 lat.SetNDC()
 lat.SetTextSize(0.03)
-lat.SetTextFont(42);
+lat.SetTextFont(42)
 
 def pvalPlot(allVals):
   
@@ -380,9 +386,17 @@ def plot1DNLL():
   elif options.method=='mu':
     x = 'r'
     xtitle = '#sigma / #sigma_{SM}'
+  elif options.method=='rv':
+    x = 'RV'
+    xtitle = '#mu_{qqH+VH}'
+  elif options.method=='rf':
+    x = 'RF'
+    xtitle = '#mu_{ggH+ttH}'
+  else:
+    sys.exit('Method not recognised for 1D scan %s'%options.method)
 
   canv = r.TCanvas(x,x,500,500)
-  if not options.legend: leg  = r.TLegend(0.35,0.65,0.6,0.79)
+  if not options.legend: leg  = r.TLegend(0.35,0.65,0.65,0.79)
   else: leg = r.TLegend(float(options.legend.split(',')[0]),float(options.legend.split(',')[1]),float(options.legend.split(',')[2]),float(options.legend.split(',')[3]))
   leg.SetLineColor(0)
   leg.SetFillColor(0)
@@ -500,12 +514,33 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
   tempX = r.gROOT.FindObject('h%s'%xvar)
   tree.Draw("%s>>h%s(10000,%1.4f,%1.4f)"%(yvar,yvar,ymin,ymax),"deltaNLL>0.","goff")
   tempY = r.gROOT.FindObject('h%s'%yvar)
-  xbins=0
-  ybins=0
-  for bin in range(1,tempX.GetNbinsX()+1):
-    if tempX.GetBinContent(bin)!=0: xbins+=1
-  for bin in range(1,tempY.GetNbinsX()+1):
-    if tempY.GetBinContent(bin)!=0: ybins+=1
+  
+  # x binning
+  if options.xbinning: 
+    xbins = int(options.xbinning.split(',')[0])
+    xmin = float(options.xbinning.split(',')[1])
+    xmax = float(options.xbinning.split(',')[2])
+  else:
+    xmin = tree.GetMinimum(xvar)
+    xmax = tree.GetMaximum(xvar)
+    tree.Draw("%s>>h%s(10000,%1.4f,%1.4f)"%(xvar,xvar,xmin,xmax),"deltaNLL>0.","goff")
+    tempX = r.gROOT.FindObject('h%s'%xvar)
+    for bin in range(1,tempX.GetNbinsX()+1):
+      if tempX.GetBinContent(bin)!=0: xbins+=1
+  
+  # y binning
+  if options.ybinning: 
+    ybins = int(options.ybinning.split(',')[0])
+    ymin = float(options.ybinning.split(',')[1])
+    ymax = float(options.ybinning.split(',')[2])
+  else:
+    ymin = tree.GetMinimum(yvar)
+    ymax = tree.GetMaximum(yvar)
+    tree.Draw("%s>>h%s(10000,%1.4f,%1.4f)"%(yvar,yvar,ymin,ymax),"deltaNLL>0.","goff")
+    tempY = r.gROOT.FindObject('h%s'%yvar)
+    for bin in range(1,tempY.GetNbinsX()+1):
+      if tempY.GetBinContent(bin)!=0: ybins+=1
+
   tree.Draw("2.*deltaNLL:%s:%s>>h%s%s(%d,%1.4f,%1.4f,%d,%1.4f,%1.4f)"%(yvar,xvar,yvar,xvar,xbins,xmin,xmax,ybins,ymin,ymax),"deltaNLL>0.","prof")
   th2 = r.gROOT.FindObject('h%s%s'%(yvar,xvar))
   gBF = r.TGraph()
@@ -550,9 +585,9 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
   gBF.Draw("Psame")
   cont_1sig.Draw("cont3same")
   cont_2sig.Draw("cont3same")
-  leg.AddEntry(gBF,"Best Fit","P");
-  leg.AddEntry(cont_1sig,"1#sigma","L");
-  leg.AddEntry(cont_2sig,"2#sigma","L");
+  leg.AddEntry(gBF,"Best Fit","P"),
+  leg.AddEntry(cont_1sig,"1#sigma","L")
+  leg.AddEntry(cont_2sig,"2#sigma","L")
   leg.Draw()
   # draw text
   if options.text:
@@ -602,7 +637,7 @@ def run():
 
   if options.method=='pval' or options.method=='limit' or options.method=='maxlh':
     runStandard()
-  elif options.method=='mh' or options.method=='mu':
+  elif options.method=='mh' or options.method=='mu' or options.method=='rv' or options.method=='rf':
     r.gROOT.ProcessLine(".x FinalResults/rootPalette.C")
     r.gROOT.LoadMacro('ResultScripts/GraphToTF1.C+')
     plot1DNLL()
