@@ -194,7 +194,7 @@ for line in relevantLines:
                         grR9.Write();
 
 # ---- vertex efficiency ----
-nominalVtxEffFile     = r.TFile(options.nominalVertex)
+nominalVtxEffFile     = r.TFile(options.nominalVertexFile)
 scaleFactorVtxEffFile = r.TFile(options.vertexFile)
 
 eff_ratio = scaleFactorVtxEffFile.Get("scaleFactor")
