@@ -128,7 +128,7 @@ void DrawJetIdEfficiency(string etaRange  = "TK",
   leg -> AddEntry(hEff_vs_JetPt[0][0][0],"MC","FL");
   leg -> AddEntry(hEff_vs_JetPt[1][0][0],"DATA","PL");
 
-  std::string text = "CMS preliminary  #sqrt{s}=8TeV  L=19.6fb^{-1}";
+  std::string text = "CMS preliminary  #sqrt{s}=8TeV  L=19.7fb^{-1}";
   TLatex *cmsprel = new TLatex(0.50,0.92,text.c_str());
   cmsprel->SetNDC();
   cmsprel->SetTextSize (0.06);
