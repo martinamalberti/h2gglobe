@@ -137,9 +137,11 @@ void makeJetIdEffUncertainties(string infilename, int mass=125, bool isMVA=true)
       //-- select event in category 4 or 5 (di-jet tagged categories)
       bool isVBF = false;
       if (isMVA) 
-	isVBF = (category==5 || category==6 || category==7);
+	//	isVBF = (category==5 || category==6 || category==7);
+	isVBF = (category==12 || category==13);
       else
-	isVBF = (category==8 || category==9 );
+	//	isVBF = (category==8 || category==9 );
+	isVBF = (category==14 || category==15 );
 
       if ( isVBF )  { 
 	//-- find the jet eta pseudorapidity region
@@ -156,8 +158,8 @@ void makeJetIdEffUncertainties(string infilename, int mass=125, bool isMVA=true)
 	}
 	
 	// -- to be conservative if the data/MC scale factor is > 1, do not correct. 
-	if (w1>1) w1=1.;
-	if (w2>1) w2=1.;
+	//if (w1>1) w1=1.;
+	//if (w2>1) w2=1.;
 	w  = w1*w2;
 	
 	//-- fill histograms with weights
@@ -179,14 +181,15 @@ void makeJetIdEffUncertainties(string infilename, int mass=125, bool isMVA=true)
 
 
   for (int iproc=0; iproc < 4; iproc++){
-    for (int icat=catmin; icat < (catmax+1); icat++){
+    //    for (int icat=catmin; icat < (catmax+1); icat++){
+    for (int icat=13; icat < 14; icat++){
       r=0;
       if (hs[iproc][icat]-> GetSumOfWeights()>0 && h[iproc][icat]-> GetSumOfWeights()>0)
 	r = hs[iproc][icat]-> GetSumOfWeights()/h[iproc][icat]-> GetSumOfWeights()-1 ;
       cout << (procnames.at(iproc)).c_str() << "   " 
 	   << icat << "   " 
-	   << setprecision(3) << fixed << h[iproc][icat] -> GetSumOfWeights() << "   " 
-	   << setprecision(3) << fixed << hs[iproc][icat]-> GetSumOfWeights() << "   "
+	   << setprecision(4) << fixed << h[iproc][icat] -> GetSumOfWeights() << "   " 
+	   << setprecision(4) << fixed << hs[iproc][icat]-> GetSumOfWeights() << "   "
 	   << setprecision(2) << fixed << r*100 << "%" 
 	   << endl;
     }
