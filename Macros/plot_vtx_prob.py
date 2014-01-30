@@ -1,7 +1,8 @@
 #!/bin/env python
 
-from ROOT import TFile, TF1, TCanvas, kBlack, kBlue, kRed, kGreen, kCyan, kMagenta, kWhite, TGraph, TF2, TF12, kFullCircle, gROOT, TLegend, TPaveText
+from ROOT import TFile, TF1, TCanvas, kBlack, kBlue, kRed, kGreen, kCyan, kMagenta, kWhite, TGraph, TF2, TF12, kFullCircle, gROOT, TLegend, TPaveText, TGraphAsymmErrors
 from sys import argv
+import math
 
 def eff(fin,name,var="pt",rebin=5):
 
@@ -43,13 +44,62 @@ gStyle.SetOptTitle(0)
 
 file=argv[1]
 
+fileUp=argv[2]
+fileDown=argv[3]
+
+nvtxrebin = 2
+
 fin=TFile.Open(file)
 eff1 = eff(fin,"eff1",rebin=10)
-eff2 = eff(fin,"eff2","nvtx",rebin=0)
+eff2 = eff(fin,"eff2","nvtx",rebin=nvtxrebin)
 print eff2
 
 prob1 = prob(fin,"prob1")
-prob2 = prob(fin,"prob2","nvtx",True,0)
+prob2 = prob(fin,"prob2","nvtx",True,nvtxrebin)
+
+#slope up
+finUp=TFile.Open(fileUp)
+prob1up = prob(finUp,"prob1up")
+prob2up = prob(finUp,"prob2up","nvtx",True,nvtxrebin)
+
+prob1up.SetLineColor(2)
+prob2up.SetLineColor(2)
+
+#slope down
+finDown=TFile.Open(fileDown)
+prob1down = prob(finDown,"prob1down")
+prob2down = prob(finDown,"prob2down","nvtx",True,nvtxrebin)
+prob1down.SetLineColor(6)
+prob2down.SetLineColor(6)
+
+#build error band
+ge1 = TGraphAsymmErrors();
+for bin in range(1,prob1.GetNbinsX()+1):
+    ge1.SetPoint(bin-1,prob1.GetBinCenter(bin),prob1.GetBinContent(bin))
+    errdown  = abs(prob1up.GetBinContent(bin)-prob1.GetBinContent(bin))
+    errup    = abs(prob1down.GetBinContent(bin)-prob1.GetBinContent(bin))
+    errstat  = prob1.GetBinError(bin)
+    ge1.SetPointEYlow(bin-1,math.sqrt(errdown*errdown+errstat*errstat))
+    ge1.SetPointEYhigh(bin-1,math.sqrt(errup*errup+errstat*errstat))
+    #ge1.SetPointEYlow(bin-1,abs(prob1up.GetBinContent(bin)-prob1.GetBinContent(bin)))
+    #ge1.SetPointEYhigh(bin-1,abs(prob1down.GetBinContent(bin)-prob1.GetBinContent(bin)))    
+ge1.SetFillColor(4);
+ge1.SetLineColor(4);
+ge1.SetMarkerColor(4);
+
+ge2 = TGraphAsymmErrors();
+for bin in range(1,prob2.GetNbinsX()+1):
+    ge2.SetPoint(bin-1,prob2.GetBinCenter(bin),prob2.GetBinContent(bin))
+    errdown  = abs(prob2up.GetBinContent(bin)-prob2.GetBinContent(bin))
+    errup    = abs(prob2down.GetBinContent(bin)-prob2.GetBinContent(bin))
+    errstat  = prob2.GetBinError(bin)
+    ge2.SetPointEYlow(bin-1,math.sqrt(errdown*errdown+errstat*errstat))
+    ge2.SetPointEYhigh(bin-1,math.sqrt(errup*errup+errstat*errstat))
+    #ge2.SetPointEYlow(bin-1,abs(prob2up.GetBinContent(bin)-prob2.GetBinContent(bin)))
+    #ge2.SetPointEYhigh(bin-1,abs(prob2down.GetBinContent(bin)-prob2.GetBinContent(bin)))
+ge2.SetFillColor(4);
+ge2.SetLineColor(4);
+ge2.SetMarkerColor(4);
 
 eff1.SetMarkerStyle(21);
 eff2.SetMarkerStyle(21);
@@ -71,7 +121,7 @@ pt.SetLineColor(0)
 pt.SetTextAlign(13)
 pt.SetTextFont(42)
 pt.AddText("CMS Preliminary Simulation")
-pt.AddText("<PU> = 19")
+pt.AddText("<PU> = 19.9")
 pt.Draw("same")
 
 c1 = TCanvas("vtxProbPt","vtxProbPt")
@@ -82,8 +132,11 @@ eff1.GetXaxis().SetTitleOffset(1.1);
 eff1.GetYaxis().SetTitleOffset(1.2);
 
 eff1.Draw("e0")
-prob1.Draw("e3 same")
+#prob1.Draw("e3 same")
+ge1.Draw("e3 same")
 eff1.Draw("e0 same")
+#prob1up.Draw("same")
+#prob1down.Draw("same")
 
 leg1 = TLegend(0.38,0.44,0.84,0.60)
 leg1.SetShadowColor(kWhite), leg1.SetLineColor(kWhite), leg1.SetFillColor(kWhite), leg1.SetTextFont(60)
@@ -103,8 +156,12 @@ eff2.GetXaxis().SetRangeUser(0, 35)
 eff2.GetXaxis().SetTitleOffset(1.1);
 eff2.GetYaxis().SetTitleOffset(1.2);
 eff2.Draw("e0")
-prob2.Draw("e3 same")
+#prob2.Draw("e3 same")
+ge2.Draw("e3 same")
 eff2.Draw("e0 same")
+#prob2up.Draw("same")
+#prob2down.Draw("same")
+
 
 leg2 = TLegend(0.52,0.62,0.82,0.82)
 leg2.SetShadowColor(kWhite), leg2.SetLineColor(kWhite), leg2.SetFillColor(kWhite), leg2.SetTextFont(60)
@@ -138,3 +195,6 @@ pt.Draw("same")
 for c in c0, c1, c2, c3:
     for fmt in "C", "png", "pdf":
         c.SaveAs( "%s.%s" % (c.GetName(), fmt) )
+
+
+raw_input("ok?")
