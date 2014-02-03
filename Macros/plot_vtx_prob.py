@@ -47,7 +47,7 @@ file=argv[1]
 fileUp=argv[2]
 fileDown=argv[3]
 
-nvtxrebin = 2
+nvtxrebin = 0
 
 fin=TFile.Open(file)
 eff1 = eff(fin,"eff1",rebin=10)
@@ -156,11 +156,11 @@ eff2.GetXaxis().SetRangeUser(0, 35)
 eff2.GetXaxis().SetTitleOffset(1.1);
 eff2.GetYaxis().SetTitleOffset(1.2);
 eff2.Draw("e0")
-#prob2.Draw("e3 same")
-ge2.Draw("e3 same")
+prob2.Draw("e3 same")
+#ge2.Draw("e3 same")
 eff2.Draw("e0 same")
-#prob2up.Draw("same")
-#prob2down.Draw("same")
+prob2up.Draw("same")
+prob2down.Draw("same")
 
 
 leg2 = TLegend(0.52,0.62,0.82,0.82)
