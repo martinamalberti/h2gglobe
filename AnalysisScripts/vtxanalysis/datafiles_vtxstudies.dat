@@ -1,16 +1,28 @@
-#intL=300000. histfile=/store/cmst3/user/malberti/HIGGS/Upgrade/%(label)s/vertexOpt.root output=eventsList.txt
-intL=300000. histfile=vertexOpt.root output=eventsList.txt sqrtS=14
+intL=300000. histfile=/store/cmst3/user/malberti/HIGGS/Upgrade/%(label)s/vertexOpt.root output=eventsList.txt sqrtS=14
+#intL=300000. histfile=vertexOpt.root output=eventsList.txt sqrtS=14
 
 #
 # Signal samples
 #
 
 ## 14TeV
-typ=-1 ind=1 draw=1   Nam=ggh_m125_14TeV   	Fil=root://eoscms//eos/cms/store/group/phys_higgs/cmshgg/reduced/MC_14TeV_PU140/mc_PU140/GluGluToHToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1/GluGluToHToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1_11.root xsec=50.35 scal=2.28e-3
 
-#split typ=-1 ind=1 draw=1   Nam=ggh_m125_14TeV   	CaDir=/store/group/phys_higgs/cmshgg/reduced/MC_14TeV_PU140/mc_PU140/GluGluToHToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1	 xsec=50.35 scal=2.28e-3
-#split typ=-1 ind=2 draw=1   Nam=vbf_m125_14TeV   	CaDir=/store/group/phys_higgs/cmshgg/reduced/MC_14TeV_PU140/mc_PU140/VBF_HToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1	 xsec=4.172 scal=2.28e-3
-#split typ=-1 ind=3 draw=1   Nam=wzh_m125_14TeV   	CaDir=/store/group/phys_higgs/cmshgg/reduced/MC_14TeV_PU140/mc_PU140/WH_ZH_HToGG_M-125_14TeV-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1	 xsec=2.387 scal=2.28e-3
+# not reduced
+#typ=-1 ind=1 draw=1   Nam=ggh_m125_8TeV  Fil=root://eoscms//eos/cms/store/group/phys_higgs/cmshgg/processed/V15_00_08/mc/Summer12_RD1/GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12_DR53X-PU_RD1_START53_V7N-v1/GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12_DR53X-PU_RD1_START53_V7N-v1_10_1_g60.root xsec=50.35 scal=2.28e-3
+
+#typ=-1 ind=1 draw=1   Nam=ggh_m125_14TeV  Fil=root://eoscms//eos/cms/store/group/phys_higgs/cmshgg/processed/14TeV_PU140/GluGluToHToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1/GluGluToHToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1_9_1_Rzz.root xsec=50.35 scal=2.28e-3
+
+#typ=-1 ind=1 draw=1   Nam=ggh_m125_14TeV  CaDir=/store/group/phys_higgs/cmshgg/processed/14TeV_PU140/GluGluToHToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1 xsec=50.35 scal=2.28e-3
+#typ=-1 ind=2 draw=1   Nam=vbf_m125_14TeV  CaDir=/store/group/phys_higgs/cmshgg/processed/14TeV_PU140/VBF_HToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1 xsec=4.172 scal=2.28e-3
+#typ=-1 ind=3 draw=1   Nam=wzh_m125_14TeV  CaDir=/store/group/phys_higgs/cmshgg/processed/14TeV_PU140/WH_ZH_HToGG_M-125_14TeV-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1 xsec=2.387 scal=2.28e-3
+
+
+# reduced
+#typ=-1 ind=1 draw=1   Nam=ggh_m125_14TeV   	Fil=root://eoscms//eos/cms/store/group/phys_higgs/cmshgg/reduced/MC_14TeV_PU140/mc_PU140/GluGluToHToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1/GluGluToHToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1_1.root xsec=50.35 scal=2.28e-3
+
+split typ=-1 ind=1 draw=1   Nam=ggh_m125_14TeV   	CaDir=/store/group/phys_higgs/cmshgg/reduced/MC_14TeV_PU140/mc_PU140/GluGluToHToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1	 xsec=50.35 scal=2.28e-3
+split typ=-1 ind=2 draw=1   Nam=vbf_m125_14TeV   	CaDir=/store/group/phys_higgs/cmshgg/reduced/MC_14TeV_PU140/mc_PU140/VBF_HToGG_M-125_14TeV-powheg-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1	 xsec=4.172 scal=2.28e-3
+split typ=-1 ind=3 draw=1   Nam=wzh_m125_14TeV   	CaDir=/store/group/phys_higgs/cmshgg/reduced/MC_14TeV_PU140/mc_PU140/WH_ZH_HToGG_M-125_14TeV-pythia6_Summer13-UpgradePhase1Age0DES_DR61SLHCx_PU140Bx25_DES17_61_V5-v1	 xsec=2.387 scal=2.28e-3
 
 
 #8TeV, 2012 PU
@@ -25,6 +37,8 @@ typ=-1 ind=1 draw=1   Nam=ggh_m125_14TeV   	Fil=root://eoscms//eos/cms/store/gro
 ##
 inputBranches minimal_analysis_input_upgrade.dat 
 inputBranches minimal_statanalysis_input.dat
+#inputBranches vtxanalysis/myinput.dat 
+
 
 plotvariables plotvariables_none.dat
 cuts cuts_none.dat
@@ -36,4 +50,7 @@ cuts cuts_none.dat
 ## 	analyzer <class_name> <config_file>
 ## 
 ## analyzer PhotonAnalysis photonanalysis.dat	
-analyzer SimpleVertexAnalysis photonanalysis.dat analysis_settings.dat statanalysis.dat puHist= minBiasRefName= sigPointsToBook=125  doEcorrectionSmear=0 doEcorrectionSyst=0 puTargets=  doMCSmearing=0
+
+analyzer SimpleVertexAnalysis photonanalysis.dat analysis_settings.dat statanalysis.dat puHist=  doEcorrectionSmear=0 doEcorrectionSyst=0 puTargets=  doMCSmearing=0  minBiasRefName=  sigmaT=0.010
+
+#analyzer SimpleVertexAnalysis photonanalysis.dat puHist= minBiasRefName= doEcorrectionSmear=0 doEcorrectionSyst=0 puTargets=  doMCSmearing=0
