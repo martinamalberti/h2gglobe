@@ -135,8 +135,8 @@ pt2.AddText("<PU> = 19.9")
 pt2.Draw("same")
 
 c1 = TCanvas("vtxProbPt","vtxProbPt")
-eff1.SetTitle("Vertex efficiency;p_{T}^{#gamma #gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
-prob1.SetTitle("Average vertex probability;p_{T}^{#gamma #gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
+eff1.SetTitle("Vertex efficiency;p_{T}^{#gamma#gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
+prob1.SetTitle("Average vertex probability;p_{T}^{#gamma#gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
 eff1.GetYaxis().SetRangeUser(0.5, 1.1)
 eff1.GetXaxis().SetTitleOffset(1.1);
 eff1.GetYaxis().SetTitleOffset(1.2);
