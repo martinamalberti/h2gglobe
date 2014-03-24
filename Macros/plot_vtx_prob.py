@@ -115,18 +115,27 @@ prob2.SetFillColor(4);
 prob2.SetLineColor(4);
 prob2.SetMarkerColor(4);
 
-pt = TPaveText(51.37856,0.5654967,190.8217,0.6623778,"br")
+#pt = TPaveText(51.37856,0.5654967,190.8217,0.6623778,"br")
+pt = TPaveText(0.,1.11,240.,1.15,"br")
 pt.SetFillColor(0)
 pt.SetLineColor(0)
 pt.SetTextAlign(13)
 pt.SetTextFont(42)
-pt.AddText("CMS Preliminary Simulation")
-pt.AddText("<PU> = 19.9")
+pt.SetTextSize(0.035)
+pt.AddText("CMS Preliminary Simulation, #sqrt{s} = 8 TeV")
 pt.Draw("same")
 
+pt2 = TPaveText(5.,1.06,80,1.09,"br")
+pt2.SetFillColor(0)
+pt2.SetLineColor(0)
+pt2.SetTextAlign(13)
+pt2.SetTextFont(42)
+pt2.AddText("<PU> = 19.9")
+pt2.Draw("same")
+
 c1 = TCanvas("vtxProbPt","vtxProbPt")
-eff1.SetTitle("Vertex efficiency;p_{T}(#gamma #gamma) (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
-prob1.SetTitle("Average vertex probability;p_{T}(#gamma #gamma) (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
+eff1.SetTitle("Vertex efficiency;p_{T,#gamma #gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
+prob1.SetTitle("Average vertex probability;p_{T,#gamma #gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
 eff1.GetYaxis().SetRangeUser(0.5, 1.1)
 eff1.GetXaxis().SetTitleOffset(1.1);
 eff1.GetYaxis().SetTitleOffset(1.2);
@@ -138,13 +147,14 @@ eff1.Draw("e0 same")
 #prob1up.Draw("same")
 #prob1down.Draw("same")
 
-leg1 = TLegend(0.38,0.44,0.84,0.60)
+leg1 = TLegend(0.40,0.24,0.89,0.40)
 leg1.SetShadowColor(kWhite), leg1.SetLineColor(kWhite), leg1.SetFillColor(kWhite), leg1.SetTextFont(60)
 
 leg1.AddEntry(eff1,"","pe")
 leg1.AddEntry(prob1,"","f")
 leg1.Draw("same")
 pt.Draw("same")
+pt2.Draw("same")
 
 
 c2 = TCanvas("vtxProbNvtx","vtxProbNvtx")
@@ -169,6 +179,7 @@ leg2.AddEntry(eff2,"","pe")
 leg2.AddEntry(prob2,"","f")
 leg2.Draw("same")
 pt.Draw("same")
+pt2.Draw("same")
 
 
 c0 = TCanvas("vtxEffPt","vtxEffPt")
@@ -180,6 +191,7 @@ leg0.AddEntry(eff0,"| z_{reco} - z_{true} | < 10 mm","lpf")
 leg0.SetShadowColor(kWhite), leg0.SetLineColor(kWhite), leg0.SetFillColor(kWhite), leg0.SetTextFont(60)
 leg0.Draw("same")
 pt.Draw("same")
+pt2.Draw("same")
 
 c3 = TCanvas("vtxEffNvtx","vtxEffNvtx")
 eff3 = eff2.Clone()
@@ -190,10 +202,10 @@ leg3.SetShadowColor(kWhite), leg3.SetLineColor(kWhite), leg3.SetFillColor(kWhite
 leg3.AddEntry(eff3,"| z_{reco} - z_{true} | < 10 mm","lpf")
 leg3.Draw("same")
 pt.Draw("same")
-
+pt2.Draw("same")
 
 for c in c0, c1, c2, c3:
-    for fmt in "C", "png", "pdf":
+    for fmt in "C", "png", "pdf", "root":
         c.SaveAs( "%s.%s" % (c.GetName(), fmt) )
 
 
