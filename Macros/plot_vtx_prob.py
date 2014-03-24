@@ -125,17 +125,18 @@ pt.SetTextSize(0.035)
 pt.AddText("CMS Preliminary Simulation, #sqrt{s} = 8 TeV")
 pt.Draw("same")
 
-pt2 = TPaveText(5.,1.06,80,1.09,"br")
+pt2 = TPaveText(5.,1.02,100,1.095,"br")
 pt2.SetFillColor(0)
 pt2.SetLineColor(0)
 pt2.SetTextAlign(13)
 pt2.SetTextFont(42)
+pt2.AddText("H#rightarrow#gamma#gamma (m_{H} = 125 GeV)")
 pt2.AddText("<PU> = 19.9")
 pt2.Draw("same")
 
 c1 = TCanvas("vtxProbPt","vtxProbPt")
-eff1.SetTitle("Vertex efficiency;p_{T,#gamma #gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
-prob1.SetTitle("Average vertex probability;p_{T,#gamma #gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
+eff1.SetTitle("Vertex efficiency;p_{T}^{#gamma #gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
+prob1.SetTitle("Average vertex probability;p_{T}^{#gamma #gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
 eff1.GetYaxis().SetRangeUser(0.5, 1.1)
 eff1.GetXaxis().SetTitleOffset(1.1);
 eff1.GetYaxis().SetTitleOffset(1.2);
