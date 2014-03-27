@@ -47,6 +47,7 @@ class SimpleVertexAnalysis : public StatAnalysis
 			      float syst_shift=0., bool skipSelection=false,
 			      BaseGenLevelSmearer *genSys=0, BaseSmearer *phoSys=0, BaseDiPhotonSmearer * diPhoSys=0); 
     
+
     TString minBiasRefName;
     int storeNVert;
     bool runOnReducedNtuples;
