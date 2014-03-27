@@ -1,0 +1,41 @@
+default=2
+htyp=0 plot=-1  ncat=1  xbins=160   ybins=0       xmin=80.0  xmax=240.0  ymin=0      ymax=0       name=all_mass xaxis=x yaxis=y
+
+htyp=0 plot=-1  ncat=1  xbins=100    ybins=0       xmin=0.0   xmax=200.0  ymin=0      ymax=0       name=pt
+htyp=0 plot=-1  ncat=1  xbins=100    ybins=0       xmin=0.0   xmax=200.0  ymin=0      ymax=0       name=pt_rv
+htyp=0 plot=-1  ncat=1  xbins=100    ybins=0       xmin=0.0   xmax=200.0  ymin=0      ymax=0       name=pt_highestsumpt2
+htyp=0 plot=-1  ncat=1  xbins=100    ybins=0       xmin=0.0   xmax=200.0  ymin=0      ymax=0       name=pt_highestsumpt2_rv
+
+htyp=0 plot=-1  ncat=1  xbins=200    ybins=0       xmin=0.5   xmax=200.5  ymin=0      ymax=0       name=nvtx
+htyp=0 plot=-1  ncat=1  xbins=200    ybins=0       xmin=0.5   xmax=200.5  ymin=0      ymax=0       name=nvtx_rv
+htyp=0 plot=-1  ncat=1  xbins=200    ybins=0       xmin=0.5   xmax=200.5  ymin=0      ymax=0       name=nvtx_highestsumpt2
+htyp=0 plot=-1  ncat=1  xbins=200    ybins=0       xmin=0.5   xmax=200.5  ymin=0      ymax=0       name=nvtx_highestsumpt2_rv
+
+htyp=0 plot=-1  ncat=1  xbins=200    ybins=0    xmin=-10    xmax=20    ymin=0      ymax=0       name=logsumpt2
+htyp=0 plot=-1  ncat=1  xbins=240    ybins=0    xmin=-20    xmax=100   ymin=0      ymax=0       name=ptbal
+htyp=0 plot=-1  ncat=1  xbins=100    ybins=0    xmin=-1     xmax=1     ymin=0      ymax=0       name=ptasym
+htyp=0 plot=-1  ncat=1  xbins=100    ybins=0    xmin=0      xmax=12    ymin=0      ymax=0       name=limpulltoconv
+htyp=0 plot=-1  ncat=1  xbins=5      ybins=0    xmin=0      xmax=5     ymin=0      ymax=0       name=nconv
+htyp=0 plot=-1  ncat=1  xbins=200    ybins=0    xmin=-2     xmax=2     ymin=0      ymax=0       name=dt
+
+htyp=0 plot=-1  ncat=1  xbins=200    ybins=0    xmin=-10    xmax=20    ymin=0      ymax=0       name=logsumpt2_rv
+htyp=0 plot=-1  ncat=1  xbins=240    ybins=0    xmin=-20    xmax=100   ymin=0      ymax=0       name=ptbal_rv
+htyp=0 plot=-1  ncat=1  xbins=100    ybins=0    xmin=-1     xmax=1     ymin=0      ymax=0       name=ptasym_rv
+htyp=0 plot=-1  ncat=1  xbins=100    ybins=0    xmin=0      xmax=12    ymin=0      ymax=0       name=limpulltoconv_rv
+htyp=0 plot=-1  ncat=1  xbins=5      ybins=0    xmin=0      xmax=5     ymin=0      ymax=0       name=nconv_rv
+htyp=0 plot=-1  ncat=1  xbins=200    ybins=0    xmin=-2     xmax=2     ymin=0      ymax=0       name=dt_rv
+
+htyp=0 plot=-1  ncat=1  xbins=200    ybins=0    xmin=-10    xmax=20    ymin=0      ymax=0       name=logsumpt2_wv
+htyp=0 plot=-1  ncat=1  xbins=240    ybins=0    xmin=-20    xmax=100   ymin=0      ymax=0       name=ptbal_wv
+htyp=0 plot=-1  ncat=1  xbins=100    ybins=0    xmin=-1     xmax=1     ymin=0      ymax=0       name=ptasym_wv
+htyp=0 plot=-1  ncat=1  xbins=100    ybins=0    xmin=0      xmax=12    ymin=0      ymax=0       name=limpulltoconv_wv
+htyp=0 plot=-1  ncat=1  xbins=5      ybins=0    xmin=0      xmax=5     ymin=0      ymax=0       name=nconv_wv
+htyp=0 plot=-1  ncat=1  xbins=200    ybins=0    xmin=-2     xmax=2     ymin=0      ymax=0       name=dt_wv
+
+htyp=0 plot=-1  ncat=1  xbins=200   ybins=0    xmin=-1  xmax=1   ymin=0       ymax=0       name=vtx_mva
+htyp=0 plot=-1  ncat=1  xbins=200   ybins=0    xmin=-1  xmax=1   ymin=0       ymax=0       name=vtx_mva_rv
+htyp=0 plot=-1  ncat=1  xbins=200   ybins=0    xmin=-1  xmax=1   ymin=0       ymax=0       name=vtx_mva_wv
+
+htyp=0 plot=-1  ncat=1  xbins=200   ybins=0    xmin=-1  xmax=1   ymin=0       ymax=0       name=evt_mva
+htyp=0 plot=-1  ncat=1  xbins=200   ybins=0    xmin=-1  xmax=1   ymin=0       ymax=0       name=evt_mva_rv
+htyp=0 plot=-1  ncat=1  xbins=200   ybins=0    xmin=-1  xmax=1   ymin=0       ymax=0       name=evt_mva_wv
