@@ -9,6 +9,8 @@
 #include "TMVA/Factory.h"
 
 #if not defined(__CINT__) || defined(__MAKECINT__)
+#include "TMVA/MethodCategory.h"
+#include "TMVA/Factory.h"
 #include "TMVA/Tools.h"
 #include "TMVA/Reader.h"
 #endif
@@ -19,14 +21,15 @@ using namespace std;
 
 int main(int argc, char** argv)
 { 
+  // TTree
+  string inputfile = argv[1];
+  TChain* tree = new TChain("vtxTree/ggh_m125_14TeV");
+  //tree->Add("~/eos/cms//store/cmst3/user/malberti/HIGGS/Upgrade/vtxPU140_testTiming_50ps/histograms_vertexOpt.root");
+  tree->Add(inputfile.c_str());
 
   // options
-  bool  useDiphotonPt = true;
-  bool  usePhotonsPt  = true;
-  
-  // Chain
-  TChain* tree = new TChain("vtxTree/ggh_m125_14TeV");
-  tree->Add("/afs/cern.ch/work/m/malberti/HGG/Upgrade/CMSSW_6_1_2/src/h2gglobe/AnalysisScripts/vertexOpt.root");
+  bool  useTiming    = atoi(argv[2]);
+  bool  useDeltaEta  = atoi(argv[3]);
   
   
   // Declaration of leaf types
@@ -45,21 +48,22 @@ int main(int argc, char** argv)
   bool isClosestToGen;
 
     
-  tree->SetBranchAddress("logsumpt2",    &logsumpt2);
-  tree->SetBranchAddress("ptbal",        &ptbal);
-  tree->SetBranchAddress("ptasym",       &ptasym);
-  tree->SetBranchAddress("limpulltoconv",&limpulltoconv);
-  tree->SetBranchAddress("nconv",        &nconv);
-  tree->SetBranchAddress("tReco1",       &tReco1);
-  tree->SetBranchAddress("tReco2",       &tReco2);
-  tree->SetBranchAddress("dtof1",        &dtof1);
-  tree->SetBranchAddress("dtof2",        &dtof2);
-  tree->SetBranchAddress("pho1",         &pho1);
-  tree->SetBranchAddress("pho2",         &pho2);
+  tree->SetBranchAddress("logsumpt2",     &logsumpt2);
+  tree->SetBranchAddress("ptbal",         &ptbal);
+  tree->SetBranchAddress("ptasym",        &ptasym);
+  tree->SetBranchAddress("limpulltoconv", &limpulltoconv);
+  tree->SetBranchAddress("nconv",         &nconv);
+  tree->SetBranchAddress("tReco1",        &tReco1);
+  tree->SetBranchAddress("tReco2",        &tReco2);
+  tree->SetBranchAddress("dtof1",         &dtof1);
+  tree->SetBranchAddress("dtof2",         &dtof2);
+  tree->SetBranchAddress("pho1",          &pho1);
+  tree->SetBranchAddress("pho2",          &pho2);
+  tree->SetBranchAddress("isClosestToGen",&isClosestToGen);
 
 
   // Create a new root output file.
-  string outputFileName = argv[1];
+  string outputFileName = argv[4];
 
   TFile* outputFile = TFile::Open((outputFileName+".root").c_str(), "RECREATE" );
   TMVA::Factory* factory = new TMVA::Factory(outputFileName.c_str(), outputFile, 
@@ -67,18 +71,21 @@ int main(int argc, char** argv)
 
 
   // -- variables
-
   factory->AddVariable( "logsumpt2");
   factory->AddVariable( "ptbal" );
   factory->AddVariable( "ptasym" );
-  //factory->AddVariable( "dtof:=(tReco1-dtof1-(tReco2-dtof2))" );
-  //factory->AddVariable( "deta:=abs(pho1.Eta()-pho2.Eta())");
-  //  factory->AddVariable( "limpulltoconv" );
-  //  factory->AddVariable( "nconv" );
-  
-  
+  factory->AddVariable( "limpulltoconv" );
+  if (useTiming){
+    factory->AddVariable( "dtof:=(tReco1-dtof1-(tReco2-dtof2))" );
+    if (useDeltaEta){
+      factory->AddVariable( "deta:=abs(pho1.Eta()-pho2.Eta())");
+    }
+  }
+
   // -- spectators
-  //factory->AddSpectator("diphoM");
+  factory->AddVariable( "nconv" );
+  //factory->AddSpectator("diphoM:=((pho1+pho2).M())");
+  factory->AddSpectator("diphoPt:=(sqrt(pow(pho1.Px()+pho2.Px(),2)+pow(pho1.Py()+pho2.Py(),2)))");
     
 
   //event weights per tree (see below for setting event-wise weights)
@@ -115,17 +122,42 @@ int main(int argc, char** argv)
   // tell the factory to use all remaining events in the trees after training for testing:
   factory->PrepareTrainingAndTestTree( mycuts, mycutb,
 				       "SplitMode=Random:NormMode=NumEvents:!V" );
+  //				       "nTrain_Signal=1000:nTrain_Background=1000:nTest_Signal=1000:nTest_Background=1000:SplitMode=Random:NormMode=NumEvents:!V" );
+
    
    
   // Boosted Decision Trees: use BDTG ( Gradient Boost )
   factory->BookMethod( TMVA::Types::kBDT, "BDTG",
 		       "!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedGrad:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=20:NNodesMax=5:MaxDepth=3" );
-  //"!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedGrad:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=20:NNodesMax=15:MaxDepth=5" );
-   
-   
-  // book Cuts
-  //factory->BookMethod( TMVA::Types::kCuts, "CutsGA",
-  //"H:!V:FitMethod=GA:CutRangeMin[0]=20:CutRangeMax[0]=500:CutRangeMin[1]=20:CutRangeMax[1]=500:VarProp=FSmart:VarProp[4]=FMin:EffSel:Steps=30:Cycles=3:PopSize=500:SC_steps=10:SC_rate=5:SC_factor=0.95" );
+
+
+
+  // --- Categorised classifier
+  TMVA::MethodCategory* mcat = 0;
+
+  // The variable sets
+  TString theCat1Vars = "logsumpt2:ptbal:ptasym";
+  TString theCat2Vars = "logsumpt2:ptbal:ptasym:limpulltoconv";
+  if (useTiming){
+    if (useDeltaEta){
+      theCat1Vars = "logsumpt2:ptbal:ptasym:dtof:deta";
+      theCat2Vars = "logsumpt2:ptbal:ptasym:limpulltoconv:dtof:deta";
+    }
+    else{
+      theCat1Vars = "logsumpt2:ptbal:ptasym:dtof";
+      theCat2Vars = "logsumpt2:ptbal:ptasym:limpulltoconv:dtof";
+    }
+  }
+
+  // BDTG with categories
+  TMVA::MethodBase* bdtgCat = factory->BookMethod( TMVA::Types::kCategory, "BDTGCat","" );
+  mcat = dynamic_cast<TMVA::MethodCategory*>(bdtgCat);
+  mcat->AddMethod( "nconv==0",theCat1Vars, TMVA::Types::kBDT,
+		   "Category_BDTG_1","!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedGrad:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=20:NNodesMax=5:MaxDepth=3" );
+  mcat->AddMethod( "nconv>0",theCat1Vars, TMVA::Types::kBDT,
+		   "Category_BDTG_2","!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedGrad:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=20:NNodesMax=5:MaxDepth=3" );
+		   
+
 
   // ---- Now you can tell the factory to train, test, and evaluate the MVAs
 
