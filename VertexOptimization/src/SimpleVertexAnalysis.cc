@@ -400,7 +400,7 @@ bool SimpleVertexAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, 
 	    l.FillHist("limpulltoconv",0, vtxAna_.limpulltoconv(vi), evweight);
 	    l.FillHist("nconv",0, vtxAna_.nconv(vi), evweight);
 	    l.FillHist("dt",0, (tReco1_-dtof1_-(tReco2_-dtof2_)) , evweight);
-	    l.FillHist("mva",0, vtxAna_.mva(vi), evweight);
+	    l.FillHist("vtx_mva",0, vtxAna_.mva(vi), evweight);
 	    if (isClosestToGen_){
 		l.FillHist("logsumpt2_rv",0, vtxAna_.logsumpt2(vi), evweight);
 		l.FillHist("ptbal_rv",0, vtxAna_.ptbal(vi), evweight);
@@ -408,7 +408,7 @@ bool SimpleVertexAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, 
 		l.FillHist("limpulltoconv_rv",0, vtxAna_.limpulltoconv(vi), evweight);
 		l.FillHist("nconv_rv",0, vtxAna_.nconv(vi), evweight);
 		l.FillHist("dt_rv",0, (tReco1_-dtof1_-(tReco2_-dtof2_)) , evweight);
-		l.FillHist("mva_rv",0, vtxAna_.mva(vi), evweight);
+		l.FillHist("vtx_mva_rv",0, vtxAna_.mva(vi), evweight);
 	    }
 	    else{
 		l.FillHist("logsumpt2_wv",0, vtxAna_.logsumpt2(vi), evweight);
@@ -417,7 +417,7 @@ bool SimpleVertexAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, 
 		l.FillHist("limpulltoconv_wv",0, vtxAna_.limpulltoconv(vi), evweight);
 		l.FillHist("nconv_wv",0, vtxAna_.nconv(vi), evweight);
 		l.FillHist("dt_wv",0, (tReco1_-dtof1_-(tReco2_-dtof2_)) , evweight);
-		l.FillHist("mva_wv",0, vtxAna_.mva(vi), evweight);
+		l.FillHist("vtx_mva_wv",0, vtxAna_.mva(vi), evweight);
 	    }
 
 
