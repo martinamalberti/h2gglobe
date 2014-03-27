@@ -306,6 +306,7 @@ bool SimpleVertexAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, 
 	    dtof1_ = tof1_-tof01; 
 	    dtof2_ = tof2_-tof02;
 	    // emulation of Treco : Treco = Tcoll + dtof (I don't care about Tcoll as I always take time differences between two objects )
+	    // + add a gaussina smearing assuming a resolution sigmaT
 	    float tof1_truevtx  = (1./c)*sqrt(pow(sc1->X()-genVtx->X(),2) + pow(sc1->Y()-genVtx->Y(),2) + pow(sc1->Z()-genVtx->Z(),2));
 	    float tof2_truevtx  = (1./c)*sqrt(pow(sc2->X()-genVtx->X(),2) + pow(sc2->Y()-genVtx->Y(),2) + pow(sc2->Z()-genVtx->Z(),2));
 	    tReco1_ = (tof1_truevtx-tof01) + rnd->Gaus(0.,sigmaT);
@@ -391,6 +392,35 @@ bool SimpleVertexAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, 
 	    }
 	    
 	    l.FillTreeContainer("vtxTree");
+
+	    // fill control plots
+	    l.FillHist("logsumpt2",0, vtxAna_.logsumpt2(vi), evweight);
+	    l.FillHist("ptbal",0, vtxAna_.ptbal(vi), evweight);
+	    l.FillHist("ptasym",0, vtxAna_.ptasym(vi), evweight);
+	    l.FillHist("limpulltoconv",0, vtxAna_.limpulltoconv(vi), evweight);
+	    l.FillHist("nconv",0, vtxAna_.nconv(vi), evweight);
+	    l.FillHist("dt",0, (tReco1_-dtof1_-(tReco2_-dtof2_)) , evweight);
+	    l.FillHist("mva",0, vtxAna_.mva(vi), evweight);
+	    if (isClosestToGen_){
+		l.FillHist("logsumpt2_rv",0, vtxAna_.logsumpt2(vi), evweight);
+		l.FillHist("ptbal_rv",0, vtxAna_.ptbal(vi), evweight);
+		l.FillHist("ptasym_rv",0, vtxAna_.ptasym(vi), evweight);
+		l.FillHist("limpulltoconv_rv",0, vtxAna_.limpulltoconv(vi), evweight);
+		l.FillHist("nconv_rv",0, vtxAna_.nconv(vi), evweight);
+		l.FillHist("dt_rv",0, (tReco1_-dtof1_-(tReco2_-dtof2_)) , evweight);
+		l.FillHist("mva_rv",0, vtxAna_.mva(vi), evweight);
+	    }
+	    else{
+		l.FillHist("logsumpt2_wv",0, vtxAna_.logsumpt2(vi), evweight);
+		l.FillHist("ptbal_wv",0, vtxAna_.ptbal(vi), evweight);
+		l.FillHist("ptasym_wv",0, vtxAna_.ptasym(vi), evweight);
+		l.FillHist("limpulltoconv_wv",0, vtxAna_.limpulltoconv(vi), evweight);
+		l.FillHist("nconv_wv",0, vtxAna_.nconv(vi), evweight);
+		l.FillHist("dt_wv",0, (tReco1_-dtof1_-(tReco2_-dtof2_)) , evweight);
+		l.FillHist("mva_wv",0, vtxAna_.mva(vi), evweight);
+	    }
+
+
 	}// end loop over vertices
 	
     
@@ -427,6 +457,20 @@ bool SimpleVertexAnalysis::AnalyseEvent(LoopAll& l, Int_t jentry, float weight, 
 	    diphoPt_[vi]= dipho.Pt();
 	}
 	l.FillTreeContainer("evtTree");
+
+	// fill control plots
+	l.FillHist("pt",0, vtxAna_.diphopt(rankedVtxs[0]), evweight);
+	l.FillHist("nvtx",0, l.vtx_std_n, evweight);
+	if ( fabs( ( *(TVector3*)l.vtx_std_xyz->At(rankedVtxs[0]) - *genVtx).Z() ) < 1 ){
+	    l.FillHist("pt_rv",0, vtxAna_.diphopt(rankedVtxs[0]), evweight);
+	    l.FillHist("nvtx_rv",0, l.vtx_std_n, evweight);
+	}
+	l.FillHist("pt_highestsumpt2",0, vtxAna_.diphopt(0), evweight);
+	l.FillHist("nvtx_highestsumpt2",0, l.vtx_std_n, evweight);
+	if ( fabs( ( *(TVector3*)l.vtx_std_xyz->At(0) - *genVtx).Z() ) < 1 ){
+	    l.FillHist("pt_highestsumpt2_rv",0, vtxAna_.diphopt(0), evweight);
+	    l.FillHist("nvtx_highestsumpt2_rv",0, l.vtx_std_n, evweight);
+	}
     }
     
     
