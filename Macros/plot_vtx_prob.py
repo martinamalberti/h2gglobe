@@ -115,14 +115,14 @@ prob2.SetFillColor(4);
 prob2.SetLineColor(4);
 prob2.SetMarkerColor(4);
 
-#pt = TPaveText(51.37856,0.5654967,190.8217,0.6623778,"br")
 pt = TPaveText(0.,1.11,240.,1.15,"br")
 pt.SetFillColor(0)
 pt.SetLineColor(0)
 pt.SetTextAlign(13)
 pt.SetTextFont(42)
-pt.SetTextSize(0.035)
-pt.AddText("CMS Preliminary Simulation, #sqrt{s} = 8 TeV")
+pt.SetTextSize(0.034)
+#pt.AddText("CMS Preliminary Simulation, #sqrt{s} = 8 TeV")
+pt.AddText("CMS Simulation, #sqrt{s} = 8 TeV")
 pt.Draw("same")
 
 pt2 = TPaveText(5.,1.02,100,1.095,"br")
@@ -135,11 +135,11 @@ pt2.AddText("<PU> = 19.9")
 pt2.Draw("same")
 
 c1 = TCanvas("vtxProbPt","vtxProbPt")
-eff1.SetTitle("Vertex efficiency;p_{T}^{#gamma#gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
-prob1.SetTitle("Average vertex probability;p_{T}^{#gamma#gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
+eff1.SetTitle("True vertex efficiency;p_{T}^{#gamma#gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
+prob1.SetTitle("Average predicted vertex probability;p_{T}^{#gamma#gamma} (GeV);Fraction | z_{reco} - z_{true} | < 10 mm")
 eff1.GetYaxis().SetRangeUser(0.5, 1.1)
 eff1.GetXaxis().SetTitleOffset(1.1);
-eff1.GetYaxis().SetTitleOffset(1.2);
+eff1.GetYaxis().SetTitleOffset(1.3);
 
 eff1.Draw("e0")
 #prob1.Draw("e3 same")
@@ -148,7 +148,7 @@ eff1.Draw("e0 same")
 #prob1up.Draw("same")
 #prob1down.Draw("same")
 
-leg1 = TLegend(0.40,0.24,0.89,0.40)
+leg1 = TLegend(0.36,0.24,0.89,0.40)
 leg1.SetShadowColor(kWhite), leg1.SetLineColor(kWhite), leg1.SetFillColor(kWhite), leg1.SetTextFont(60)
 
 leg1.AddEntry(eff1,"","pe")
